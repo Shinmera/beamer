@@ -8,9 +8,7 @@
   (:nicknames #:org.shirakumo.slide-beam)
   (:use #:cl+trial)
   (:export))
-(in-package #:org.shirakumo.slide-beam)
 
-(defclass slide-show (main)
-  ())
-
-
+(defpackage #:slide-beam-user
+  (:nicknames #:org.shirakumo.slide-beam.user)
+  (:export))

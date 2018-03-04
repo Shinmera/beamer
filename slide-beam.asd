@@ -12,5 +12,11 @@
   :description "A slide show software based on Trail"
   :homepage "https://github.com/Shinmera/slide-beam"
   :serial T
-  :components ((:file "slide-beam"))
-  :depends-on (:trial-glfw))
+  :components ((:file "package")
+               (:file "slide-show")
+               (:file "functions"))
+  :defsystem-depends-on (:deploy)
+  :depends-on (:trial-glfw)
+  :build-operation "deploy-op"
+  :build-pathname "slide-beam"
+  :entry-point "slide-beam:toplevel")
