@@ -1,22 +1,23 @@
 #|
- This file is a part of slide-beam
+ This file is a part of beamer
  (c) 2018 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(asdf:defsystem slide-beam
+(asdf:defsystem beamer
   :version "1.0.0"
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
   :description "A slide show software based on Trail"
-  :homepage "https://github.com/Shinmera/slide-beam"
+  :homepage "https://github.com/Shinmera/beamer"
   :serial T
   :components ((:file "package")
                (:file "slide-show")
-               (:file "functions"))
+               (:file "functions")
+               (:file "main"))
   :defsystem-depends-on (:deploy)
   :depends-on (:trial-glfw)
   :build-operation "deploy-op"
-  :build-pathname "slide-beam"
-  :entry-point "slide-beam:toplevel")
+  :build-pathname "beamer"
+  :entry-point "beamer:toplevel")
