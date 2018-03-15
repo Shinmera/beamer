@@ -23,19 +23,30 @@
   (:export
    #:*slide*
    #:load-slide-show
+   #:current-show
    #:slide-show
-   #:base
-   #:slide-package
+   #:source
    #:slides
    #:index
-   #:load-slide
    #:current-slide
    #:advance-slide
    #:next-slide
    #:prev-slide
    #:slide
+   #:define-slide
+   #:slide
    #:slide-show
-   #:source
-   #:name
+   #:constructor
    #:enter-instance
-   #:define-slide-function))
+   #:reconstruct-slide))
+
+(defpackage #:beamer-user
+  (:nicknames #:org.shirakumo.beamer.user)
+  (:import-from #:cl #:in-package #:use-package))
+
+(dolist (name '(#:define-slide #:enter-instance #:p #:h #:list #:editor))
+  (let ((symbol (find-symbol (string name) '#:org.shirakumo.beamer)))
+    (import symbol '#:org.shirakumo.beamer.user)))
+
+(do-symbols (symbol '#:org.shirakumo.beamer.user)
+  (export symbol '#:org.shirakumo.beamer.user))

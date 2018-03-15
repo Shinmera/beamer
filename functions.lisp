@@ -6,19 +6,46 @@
 
 (in-package #:org.shirakumo.beamer)
 
-(defun h (text)
-  (enter-instance 'header :text text :size 24))
+(define-pool beamer
+  :base :beamer)
 
-(define-shader-entity header (text)
+(define-asset (beamer header) font
+    #p"Concourse C6 Regular.ttf"
+  :size 48)
+
+(define-asset (beamer text) font
+    #p"Concourse T3 Regular.ttf"
+  :size 24)
+
+(define-asset (beamer code) font
+    #p"Triplicate T4 Code Regular.ttf"
+  :size 24)
+
+(define-shader-subject slide-text (ui-element text)
   ()
-  (:default-initargs :font (asset 'trial:trial 'trial::noto-sans)))
+  (:default-initargs :width 500
+                     :wrap T))
+
+(define-handler (slide-text resize) (ev width height)
+  (setf (width slide-text) width))
+
+(defun h (text)
+  (enter-instance 'header :text text))
+
+(define-shader-subject header (slide-text)
+  ()
+  (:default-initargs :font (asset 'beamer 'header)))
 
 (defun p (text)
   (enter-instance 'paragraph :text text))
 
-(define-shader-entity paragraph (text)
+(define-shader-subject paragraph (slide-text)
   ()
-  (:default-initargs :font (asset 'trial:trial 'trial::noto-sans)))
+  (:default-initargs :font (asset 'beamer 'text)))
+
+(define-shader-subject code (slide-text)
+  ()
+  (:default-initargs :font (asset 'beamer 'code)))
 
 ;; (defun list (&body entries)
 ;;   (enter-instance 'list :entries entries))

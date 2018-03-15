@@ -14,10 +14,12 @@
   :serial T
   :components ((:file "package")
                (:file "slide-show")
+               (:file "ui")
                (:file "functions")
                (:file "main"))
   :defsystem-depends-on (:deploy)
-  :depends-on (:trial-glfw)
+  :depends-on (:trial-glfw
+               :array-utils)
   :build-operation "deploy-op"
   :build-pathname "beamer"
   :entry-point "beamer:toplevel")
