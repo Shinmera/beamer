@@ -98,17 +98,7 @@
     (when pos
       (setf (slide pos show) null))))
 
-(defmacro define-slide (name &body body)
-  (let ((constructor (gensym "SCENE-CONSTRUCTOR")))
-    `(flet ((,constructor ()
-              ,@body))
-       (let ((*slide* (make-instance 'slide :name ',name
-                                            :slide-show (current-show)
-                                            :constructor #',constructor)))
-         (,constructor)
-         (setf (slide ',name) *slide*)))))
-
-(defclass slide (pipelined-scene)
+(defclass slide (pipelined-scene pane)
   ((slide-show :initarg :slide-show :reader slide-show)
    (constructor :initarg :constructor :accessor constructor)))
 
@@ -131,3 +121,18 @@
                                        :constructor (constructor slide))))
     (funcall (constructor slide))
     *slide*))
+
+(defmethod resize :after ((slide slide) width height)
+  (setf (slot-value slide 'width) width)
+  (setf (slot-value slide 'height) height)
+  (child-changed (pane slide) slide))
+
+(defmacro define-slide (name &body body)
+  (let ((constructor (gensym "SCENE-CONSTRUCTOR")))
+    `(flet ((,constructor ()
+              ,@body))
+       (let ((*slide* (make-instance 'slide :name ',name
+                                            :slide-show (current-show)
+                                            :constructor #',constructor)))
+         (,constructor)
+         (setf (slide ',name) *slide*)))))

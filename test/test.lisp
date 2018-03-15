@@ -10,10 +10,15 @@
   (define-asset (trial::workbench cube) mesh
     (make-cube 100))
 
-  (define-shader-subject cube (vertex-entity located-entity colored-entity)
+  (define-shader-subject cube (vertex-entity located-entity rotated-entity colored-entity)
     ()
     (:default-initargs
+     :location (vec 400 300 0)
      :vertex-array (asset 'trial::workbench 'cube)
      :color (vec 1 0 0)))
+
+  (define-handler (cube tick) (ev dt)
+    (incf (vx (rotation cube)) dt)
+    (incf (vy (rotation cube)) dt))
 
   (enter-instance 'cube))

@@ -13,8 +13,8 @@
   :homepage "https://github.com/Shinmera/beamer"
   :serial T
   :components ((:file "package")
-               (:file "slide-show")
                (:file "ui")
+               (:file "slide-show")
                (:file "functions")
                (:file "main"))
   :defsystem-depends-on (:deploy)

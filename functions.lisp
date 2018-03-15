@@ -11,41 +11,47 @@
 
 (define-asset (beamer header) font
     #p"Concourse C6 Regular.ttf"
-  :size 48)
+  :size 72)
 
 (define-asset (beamer text) font
     #p"Concourse T3 Regular.ttf"
-  :size 24)
+  :size 48)
 
 (define-asset (beamer code) font
     #p"Triplicate T4 Code Regular.ttf"
-  :size 24)
+  :size 48)
 
-(define-shader-subject slide-text (ui-element text)
+(define-shader-entity slide-text (text ui-element)
   ()
-  (:default-initargs :width 500
-                     :wrap T))
+  (:default-initargs :wrap T))
 
-(define-handler (slide-text resize) (ev width height)
-  (setf (width slide-text) width))
+(defmethod paint :around ((text slide-text) target)
+  (with-pushed-matrix (model-matrix)
+    (translate-by 0 (- (getf (text-extent text "") :t)) 0)
+    (call-next-method)))
+
+(define-shader-entity header (slide-text)
+  ()
+  (:default-initargs :font (asset 'beamer 'header)
+                     :margin (vec4 10 5 0 20)))
 
 (defun h (text)
   (enter-instance 'header :text text))
 
-(define-shader-subject header (slide-text)
+(define-shader-entity paragraph (slide-text)
   ()
-  (:default-initargs :font (asset 'beamer 'header)))
+  (:default-initargs :font (asset 'beamer 'text)
+                     :margin (vec2 0 24)))
 
 (defun p (text)
   (enter-instance 'paragraph :text text))
 
-(define-shader-subject paragraph (slide-text)
-  ()
-  (:default-initargs :font (asset 'beamer 'text)))
-
-(define-shader-subject code (slide-text)
+(define-shader-entity code (slide-text)
   ()
   (:default-initargs :font (asset 'beamer 'code)))
+
+(defun c (text)
+  (enter-instance 'code :text text))
 
 ;; (defun list (&body entries)
 ;;   (enter-instance 'list :entries entries))
