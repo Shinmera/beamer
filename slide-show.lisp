@@ -39,7 +39,7 @@
    (slides :initform (make-array 0 :adjustable T :fill-pointer T) :accessor slides)
    (index :initform -1 :accessor index))
   (:default-initargs
-   :clear-color (vec 1 1 1)))
+   :clear-color (vec 20/255 25/255 28/255)))
 
 (defmethod initialize-instance ((show slide-show) &key slides source)
   (call-next-method)
@@ -64,6 +64,10 @@
   (map NIL #'finalize (slides show)))
 
 (defmethod setup-scene ((show slide-show) scene))
+
+(defmethod change-scene :around ((show slide-show) scene)
+  (with-context ((context show))
+    (call-next-method)))
 
 (defmethod (setf index) :after (value (show slide-show))
   (change-scene show (aref (slides show) value)))

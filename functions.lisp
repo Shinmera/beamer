@@ -23,7 +23,10 @@
 
 (define-shader-entity slide-text (text ui-element)
   ()
-  (:default-initargs :wrap T))
+  (:default-initargs
+   :color (vec 1 1 1 1)
+   :wrap T
+   :width 800))
 
 (defmethod paint :around ((text slide-text) target)
   (with-pushed-matrix (model-matrix)
@@ -48,13 +51,58 @@
 
 (define-shader-entity code (slide-text)
   ()
-  (:default-initargs :font (asset 'beamer 'code)))
+  (:default-initargs :font (asset 'beamer 'code)
+                     :margin (vec2 0 24)))
 
 (defun c (text)
   (enter-instance 'code :text text))
 
-;; (defun list (&body entries)
-;;   (enter-instance 'list :entries entries))
+(define-asset (beamer bullet) mesh
+    (make-sphere 6))
+
+(define-shader-entity bullet (vertex-entity colored-entity)
+  ()
+  (:default-initargs
+   :vertex-array (asset 'beamer 'bullet)
+   :color (vec4 1 1 1 1)))
+
+(defclass items (pane)
+  ((bullet :initarg :bullet :accessor bullet))
+  (:default-initargs
+   :layout (make-instance 'vertical-layout :padding (vec4 50 24 0 24))
+   :bullet (make-instance 'bullet)))
+
+(defmethod initialize-instance :after ((items items) &key entries)
+  (dolist (entry entries)
+    (enter (make-instance 'paragraph :text entry :margin (vec2 0 10)) items)))
+
+(defmethod register-object-for-pass :after (pass (items items))
+  (register-object-for-pass pass (bullet items)))
+
+(defmethod child-changed :after ((items items) child)
+  (setf (slot-value items 'height)
+        (+ (vy (padding (layout items)))
+           (for:for ((item over items)
+                     (sum summing (+ (vy (margin item))
+                                     (or (height item) 0)
+                                     (vw (margin item))))))
+           (vw (padding (layout items)))))
+  (unless (eq items (pane items))
+    (child-changed (pane items) items)))
+
+(defmethod paint ((items items) target)
+  (with-pushed-matrix (model-matrix)
+    (translate-by 0 (- (height items)) 0)
+    (for:for ((item over items))
+      (with-pushed-matrix (model-matrix)
+        (translate-by (/ (vx (padding (layout items))) 2)
+                      (- (vy (location item)) (/ (size item) 2))
+                      0)
+        (paint (bullet items) target))
+      (paint item target))))
+
+(defun items (&rest entries)
+  (enter-instance 'items :entries entries))
 
 ;; (defun editor (source)
 ;;   (enter-instance 'editor :source source))

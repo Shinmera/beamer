@@ -77,6 +77,9 @@
           (setf (width element) (- (width container)
                                    (vx pad) (vz pad)
                                    (vx mar) (vz mar)))
+          ;; GROSS
+          (when (typep element 'pane)
+            (update-layout (layout element) element))
           (setf (vx (location element)) (+ (vx pad) (vx mar)))
           (decf y (vy mar))
           (setf (vy (location element)) y)

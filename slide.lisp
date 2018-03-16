@@ -51,8 +51,11 @@
   (let ((constructor (gensym "SCENE-CONSTRUCTOR")))
     `(flet ((,constructor ()
               ,@body))
-       (let ((*slide* (make-instance 'slide :name ',name
+       (let ((*layout-update-in-progress* T)
+             (*slide* (make-instance 'slide :name ',name
                                             :slide-show (current-show)
                                             :constructor #',constructor)))
-         (,constructor)
+         (if *context*
+             (with-context (*context*) (,constructor))
+             (,constructor))
          (setf (slide ',name) *slide*)))))
