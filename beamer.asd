@@ -16,7 +16,8 @@
                (:file "ui")
                (:file "slide-show")
                (:file "functions")
-               (:file "main"))
+               (:file "slide")
+               (:file "controller"))
   :defsystem-depends-on (:deploy)
   :depends-on (:trial-glfw
                :array-utils)

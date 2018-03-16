@@ -11,15 +11,15 @@
 
 (define-asset (beamer header) font
     #p"Concourse C6 Regular.ttf"
-  :size 72)
+  :size 72 :oversample 2)
 
 (define-asset (beamer text) font
     #p"Concourse T3 Regular.ttf"
-  :size 48)
+  :size 48 :oversample 2)
 
 (define-asset (beamer code) font
     #p"Triplicate T4 Code Regular.ttf"
-  :size 48)
+  :size 48 :oversample 2)
 
 (define-shader-entity slide-text (text ui-element)
   ()
@@ -33,7 +33,7 @@
 (define-shader-entity header (slide-text)
   ()
   (:default-initargs :font (asset 'beamer 'header)
-                     :margin (vec4 10 5 0 20)))
+                     :margin (vec4 20 5 0 20)))
 
 (defun h (text)
   (enter-instance 'header :text text))
