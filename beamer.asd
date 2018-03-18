@@ -16,6 +16,7 @@
                (:file "ui")
                (:file "slide-show")
                (:file "functions")
+               (:file "editor")
                (:file "slide")
                (:file "controller"))
   :defsystem-depends-on (:deploy)

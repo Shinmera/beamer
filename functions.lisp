@@ -104,5 +104,3 @@
 (defun items (&rest entries)
   (enter-instance 'items :entries entries))
 
-;; (defun editor (source)
-;;   (enter-instance 'editor :source source))
