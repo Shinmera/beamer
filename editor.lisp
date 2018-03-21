@@ -7,35 +7,41 @@
 (in-package #:org.shirakumo.beamer)
 
 (define-shader-entity cursor (vertex-entity)
-  ((editor :initarg :editor :accessor editor)
-   (pos :initform 0 :accessor pos)
+  ((parent :initarg :parent :accessor parent)
+   (col :initform 0 :accessor col)
+   (row :initform 0 :accessor row)
    (cursor-size :initform (vec4 0 0 0.5 1) :reader cursor-size))
   (:default-initargs
-   :editor (error "EDITOR required.")
-   :vertex-array (asset 'trial 'fullscreen-square)))
+   :parent (error "PARENT required.")
+   :vertex-array (asset 'trial 'trial::fullscreen-square)))
 
-(defmethod initialize-instance :after ((cursor cursor) &key editor)
-  (let* ((extent (extent editor))
-         (u (getf extent :t))
-         (b (getf extent :b)))
+(defmethod init ((cursor cursor))
+  (let* ((parent (parent cursor))
+         (extent (extent parent)))
     (setf (vy (cursor-size cursor)) 0)
-    (setf (vz (cursor-size cursor)) (/ (size editor)
-                                       (size (font editor))
-                                       2))
-    (setf (vw (cursor-size cursor)) (/ (- u b) 2))))
+    (setf (vz (cursor-size cursor)) 1)
+    (setf (vw (cursor-size cursor)) (/ (getf extent :t) 2))
+    (setf (row cursor) 0)))
 
-(defmethod (setf pos) :around (value (cursor cursor))
-  (call-next-method (min (length (text (editor cursor))) (max 0 value)) cursor))
+(defmethod (setf row) :around (value (cursor cursor))
+  (call-next-method (min (1- (length (lines (parent cursor)))) (max 0 value)) cursor))
 
-(defmethod (setf pos) :after (value (cursor cursor))
-  (let ((rs 0) (r 0))
-    (dotimes (i value)
-      (when (eql #\Linefeed (aref text i))
-        (setf rs i) (incf r)))
-    (setf (vy (cursor-size cursor)) (* r (+ (getf extent :t) (getf extent :gap))))
+(defmethod (setf row) :after (row (cursor cursor))
+  (let ((extent (text-extent (parent cursor) (subseq (line (parent cursor) row) 0 (col* cursor)))))
+    (setf (vy (cursor-size cursor)) (- 0 (getf extent :b)
+                                       (* row (+ (getf extent :t) (getf extent :gap)))))
+    (setf (vx (cursor-size cursor)) (getf extent :r))))
+
+(defmethod (setf col) :around (value (cursor cursor))
+  (call-next-method (min (length (line (parent cursor) (row cursor))) (max 0 value)) cursor))
+
+(defmethod (setf col) :after (col (cursor cursor))
+  (let ((extent (text-extent (parent cursor) (subseq (line (parent cursor) (row cursor)) 0 col))))
     (setf (vx (cursor-size cursor))
-          (getf (text-extent (editor cursor) (subseq (text (editor cursor)) rs (pos cursor)))
-                :r))))
+          (* (getf extent :r)))))
+
+(defmethod col* ((cursor cursor))
+  (min (col cursor) (length (line (parent cursor) (row cursor)))))
 
 (defmethod paint :before ((cursor cursor) target)
   (let ((size (cursor-size cursor)))
@@ -46,38 +52,61 @@
   "out vec4 color;
 
 void main(){
-    color = vec4(0,0,0,1);
+    color = vec4(1,1,1,1);
 }")
 
 (define-shader-subject editor (slide-text)
   ((file :initarg :file :accessor file)
+   (lines :initform NIL :accessor lines)
    (start :initarg :start :accessor start)
    (end :initarg :end :accessor end)
-   (cursor :initform NIL :accessor cursor)))
+   (cursor :initform NIL :accessor cursor))
+  (:default-initargs :font (asset 'beamer 'code)
+                     :size 24
+                     :wrap NIL
+                     :margin (vec2 0 24)))
 
-(defmethod initialize-instance :after ((editor editor) &key)
-  (setf (cursor editor) (make-instance 'cursor :editor editor))
-  (setf (text editor) (load-text editor)))
+(defmethod initialize-instance :after ((editor editor) &key file)
+  (setf (cursor editor) (make-instance 'cursor :parent editor))
+  (when file
+    (load-text editor)))
 
 (defmethod (setf file) :after (file (editor editor))
-  (setf (text editor) (load-text editor)))
+  (load-text editor))
 
 (defmethod (setf start) :after (start (editor editor))
-  (setf (text editor) (load-text editor)))
+  (load-text editor))
 
 (defmethod (setf end) :after (end (editor editor))
-  (setf (text editor) (load-text editor)))
+  (load-text editor))
+
+(defmethod paint :after ((editor editor) target)
+  (paint (cursor editor) target))
+
+(defmethod register-object-for-pass :after (pass (editor editor))
+  (register-object-for-pass pass (cursor editor)))
+
+(defmethod line ((editor editor) n)
+  (aref (lines editor) n))
+
+(defmethod (setf line) (value (editor editor) n)
+  (setf (aref (lines editor) n) value))
 
 (defmethod load-text ((editor editor))
   (with-open-file (s (file editor))
     (loop repeat (or (start editor) 0)
           do (read-line s))
-    (with-output-to-string (o)
-      (loop repeat (if (end editor)
-                       (- (end editor) (or (start editor) 0))
-                       most-positive-fixnum)
-            for line = (read-line s NIL)
-            while line do (write-line line o)))))
+    (let ((lines (make-array 0 :adjustable T :fill-pointer T)))
+      (setf (text editor)
+            (with-output-to-string (o)
+              (loop repeat (if (end editor)
+                               (- (end editor) (or (start editor) 0))
+                               most-positive-fixnum)
+                    for line = (read-line s NIL)
+                    while line
+                    do (write-line line o)
+                       (vector-push-extend line lines))))
+      (setf (lines editor) lines))))
 
 (defmethod save-text ((editor editor))
   (let ((full (with-output-to-string (o)
@@ -94,6 +123,9 @@ void main(){
     (with-open-file (s (file editor) :direction :output :if-exists :supersede)
       (write-string full s))))
 
+(defmethod resources-ready :after ((editor editor))
+  (init (cursor editor)))
+
 (defun string-remove-pos (string pos)
   (let ((new (make-array (1- (length string)) :element-type 'character)))
     (replace new string :end1 pos)
@@ -107,28 +139,76 @@ void main(){
     (replace new string :start1 (+ pos (length stuff)) :start2 pos)
     new))
 
+(defun %prev-line-pos (editor &optional (pos (pos (cursor editor))))
+  (loop for i downfrom pos to 0
+        do (when (char= (aref (text editor) i) #\Linefeed)
+             (return i))
+        finally (return 0)))
+
+(defun %next-line-pos (editor &optional (pos (pos (cursor editor))))
+  (loop for i from pos below (length (text editor))
+        do (when (char= (aref (text editor) i) #\Linefeed)
+             (return i))
+        finally (return (length (text editor)))))
+
+(defun join-lines (vec)
+  (with-output-to-string (out)
+    (when (< 0 (length vec))
+      (write-string (aref vec 0) out)
+      (loop for i from 1 below (length vec)
+            do (format out "~%~a" (aref vec i))))))
+
 (define-handler (editor key-release) (ev key)
-  (with-accessors ((pos pos)) (cursor editor)
-    (case key
-      (:backspace
-       (when (<= 1 pos (length (text editor)))
-         (setf (text editor) (string-remove-pos (text editor) (1- pos)))
-         (decf pos)))
-      (:delete
-       (when (< -1 pos (length (text editor)))
-         (setf (text editor) (string-remove-pos (text editor) pos))))
-      (:left
-       (decf pos))
-      (:right
-       (incf pos))
-      (:home
-       (setf pos 0))
-      (:end
-       (setf pos (length (text editor)))))))
+  (with-accessors ((col col) (row row)) (cursor editor)
+    (flet ((del ()
+             (cond ((= (length (line editor row)) col)
+                    (when (< row (1- (length (lines editor))))
+                      (setf (line editor row) (format NIL "~a~a" (line editor row) (line editor (1+ row))))
+                      (array-utils:vector-pop-position (lines editor) (1+ row))))
+                   (T
+                    (setf (line editor row) (string-remove-pos (line editor row) col))))
+             (setf (text editor) (join-lines (lines editor)))))
+      (case key
+        (:enter
+         (let ((old (line editor row)))
+           (setf (line editor row) (subseq old 0 col))
+           (array-utils:vector-push-extend-position (subseq old col) (lines editor) (1+ row))
+           (setf col 0)
+           (incf row)
+           (setf (text editor) (join-lines (lines editor)))))
+        (:backspace
+         (cond ((= 0 col)
+                (when (< 0 row)
+                  (decf row)
+                  (setf col (length (line editor row)))
+                  (del)))
+               (T
+                (decf col)
+                (del))))
+        (:delete
+         (del))
+        (:left
+         (if (= 0 col)
+             (setf row (1- row) col (length (line editor row)))
+             (decf col)))
+        (:right
+         (if (<= (length (line editor row)) col)
+             (setf row (1+ row) col 0)
+             (incf col)))
+        (:up
+         (decf row))
+        (:down
+         (incf row))
+        (:home
+         (setf col 0))
+        (:end
+         (setf col (length (line editor row))))))))
 
 (define-handler (editor text-entered) (ev text)
-  (setf (text editor) (string-insert-pos (text editor) (pos (cursor editor)) text))
-  (incf (pos (cursor editor)) (length text)))
+  (with-accessors ((pos pos) (col col) (col* col*) (row row)) (cursor editor)
+    (setf (line editor row) (string-insert-pos (line editor row) col* text))
+    (setf (text editor) (join-lines (lines editor)))
+    (setf (col (cursor editor)) (+ col* (length text)))))
 
 (defun editor (source &key start end)
   (enter-instance 'editor :file source :start start :end end))
