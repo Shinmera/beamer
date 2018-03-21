@@ -9,13 +9,12 @@
 (define-action slideshow ())
 
 (define-action next (slideshow)
-  (key-release (one-of key :right :n :space :enter :return :pgdn :page-down))
-  (mouse-release (one-of button :left))
-  (gamepad-release (one-of button :dpad-r :r1 :r2)))
+  (key-release (one-of key :page-down))
+  (gamepad-release (one-of button :r1)))
 
 (define-action prev (slideshow)
-  (key-release (one-of key :left :p :backspace :pgup :page-up))
-  (gamepad-release (one-of button :dpad-l :l1 :l2)))
+  (key-release (one-of key :page-up))
+  (gamepad-release (one-of button :l1)))
 
 (define-action reload (slideshow)
   (key-release (one-of key :f5 :r))
