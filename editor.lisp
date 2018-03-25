@@ -159,20 +159,20 @@ void main(){
             do (format out "~%~a" (aref vec i))))))
 
 (define-handler (editor key-release) (ev key)
-  (with-accessors ((col col) (row row)) (cursor editor)
+  (with-accessors ((col col) (row row) (col* col*)) (cursor editor)
     (flet ((del ()
-             (cond ((= (length (line editor row)) col)
+             (cond ((<= (length (line editor row)) col)
                     (when (< row (1- (length (lines editor))))
                       (setf (line editor row) (format NIL "~a~a" (line editor row) (line editor (1+ row))))
                       (array-utils:vector-pop-position (lines editor) (1+ row))))
                    (T
-                    (setf (line editor row) (string-remove-pos (line editor row) col))))
+                    (setf (line editor row) (string-remove-pos (line editor row) col*))))
              (setf (text editor) (join-lines (lines editor)))))
       (case key
         (:enter
          (let ((old (line editor row)))
-           (setf (line editor row) (subseq old 0 col))
-           (array-utils:vector-push-extend-position (subseq old col) (lines editor) (1+ row))
+           (setf (line editor row) (subseq old 0 col*))
+           (array-utils:vector-push-extend-position (subseq old col*) (lines editor) (1+ row))
            (setf col 0)
            (incf row)
            (setf (text editor) (join-lines (lines editor)))))
@@ -183,7 +183,7 @@ void main(){
                   (setf col (length (line editor row)))
                   (del)))
                (T
-                (decf col)
+                (setf col (1- col*))
                 (del))))
         (:delete
          (del))
