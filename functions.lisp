@@ -38,24 +38,24 @@
   (:default-initargs :font (asset 'beamer 'header)
                      :margin (vec4 20 5 0 20)))
 
-(defun h (text)
-  (enter-instance 'header :text text))
+(defun h (text &rest initargs)
+  (apply #'enter-instance 'header :text (princ-to-string text) initargs))
 
 (define-shader-entity paragraph (slide-text)
   ()
   (:default-initargs :font (asset 'beamer 'text)
                      :margin (vec2 0 24)))
 
-(defun p (text)
-  (enter-instance 'paragraph :text text))
+(defun p (text &rest initargs)
+  (apply #'enter-instance 'paragraph :text (princ-to-string text) initargs))
 
 (define-shader-entity code (slide-text)
   ()
   (:default-initargs :font (asset 'beamer 'code)
                      :margin (vec2 0 24)))
 
-(defun c (text)
-  (enter-instance 'code :text text))
+(defun c (text &rest initargs)
+  (apply #'enter-instance 'code :text (princ-to-string text) initargs))
 
 (define-asset (beamer bullet) mesh
     (make-sphere 6))

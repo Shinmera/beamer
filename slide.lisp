@@ -18,9 +18,11 @@
 
 (defclass slide (pipelined-scene pane)
   ((slide-show :initarg :slide-show :reader slide-show)
-   (constructor :initarg :constructor :accessor constructor)))
+   (constructor :initarg :constructor :accessor constructor)
+   (selection-buffer :initform NIL :accessor selection-buffer)))
 
 (defmethod initialize-instance :after ((slide slide) &key)
+  (setf (selection-buffer slide) (make-instance 'selection-buffer :scene slide :width 800 :height 600))
   (enter (make-instance 'slide-camera :name :camera) slide)
   (enter (make-instance 'render-pass) slide))
 

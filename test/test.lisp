@@ -1,15 +1,20 @@
 (in-package "test")
 (use-package :cl+trial)
 
+(define-shader-subject slide-subject (located-entity rotated-entity selectable)
+  ()
+  (:default-initargs
+   :location (vec 400 300 0)))
+
+(defmethod initialize-instance :after ((subject slide-subject) &key &allow-other-keys))
+
 (define-slide welcome
   (h "Welcome to Beamer")
-  (p "Paragraph! With some more words and things in it now. Maybe even another line.
-HARD BREAK!")
+  (p "Paragraph!")
   (items
    "Something something"
    "Well this is going to be a rather large list entry so hopefully it'll line wrap."
-   "Fart"
-   "How about another list item?")
+   "Fart")
   (c "(michael-rosen:click :nice)"))
 
 (define-slide cube
@@ -19,26 +24,33 @@ HARD BREAK!")
   (Define-asset (trial::workbench cat) image
       #p"cat.png")
 
-  (define-shader-subject cube (vertex-entity located-entity rotated-entity textured-entity)
-    ((zoom :initform 1 :accessor zoom))
+  (define-shader-subject cube (slide-subject vertex-entity textured-entity)
+    ()
     (:default-initargs
-     :location (vec 400 300 0)
      :vertex-array (asset 'trial::workbench 'cube)
      :texture (asset 'trial::workbench 'cat)))
 
   (define-handler (cube tick) (ev dt tt)
     (incf (vx (rotation cube)) (* 10 dt))
-    (incf (vy (rotation cube)) dt)
-    (setf (zoom cube) (sin tt)))
+    (incf (vy (rotation cube)) dt))
 
-  (defmethod paint :around ((cube cube) target)
-    (with-pushed-matrix (model-matrix)
-      (scale-by (zoom cube) (zoom cube) (zoom cube))
-      (call-next-method)))
-
-  (h "This is a spinning cube.")
-  (p "Neat, right?")
-  (p "Oh man.")
-  (p "wow.")
-
+  (h "This is a cube")
   (enter-instance 'cube))
+
+(define-slide editor
+  (h "Hi there")
+
+  (define-shader-subject cube (vertex-entity
+                               textured-entity
+                               ;colored-entity
+                               slide-subject)
+    ())
+
+  (enter-instance 'cube
+                  :location (vec 800 300 0)
+                  :vertex-array (asset 'trial::workbench 'cube)
+                  :texture (asset 'trial::workbench 'cat)
+                  :color (vec 0.2 0.2 0.8))
+  
+  (editor "test.lisp" :start 40 :size 16)
+  (c (getf (effective-shaders 'cube) :fragment-shader) :size 16 :margin 0))

@@ -6,6 +6,17 @@
 
 (in-package #:org.shirakumo.beamer)
 
+(define-action editor-keys ())
+
+(define-action save (editor-keys)
+  (key-press (and (eql key :s) (find :control modifiers))))
+
+(define-action load (editor-keys)
+  (key-press (and (eql key :l) (find :control modifiers))))
+
+(define-action recompile (editor-keys)
+  (key-press (and (eql key :c) (find :control modifiers))))
+
 (define-shader-entity cursor (vertex-entity)
   ((parent :initarg :parent :accessor parent)
    (col :initform 0 :accessor col)
@@ -64,6 +75,8 @@ void main(){
   (:default-initargs :font (asset 'beamer 'code)
                      :size 24
                      :wrap NIL
+                     :start NIL
+                     :end NIL
                      :margin (vec2 0 24)))
 
 (defmethod initialize-instance :after ((editor editor) &key file)
@@ -94,7 +107,7 @@ void main(){
 
 (defmethod load-text ((editor editor))
   (with-open-file (s (file editor))
-    (loop repeat (or (start editor) 0)
+    (loop repeat (1- (or (start editor) 0))
           do (read-line s))
     (let ((lines (make-array 0 :adjustable T :fill-pointer T)))
       (setf (text editor)
@@ -111,7 +124,7 @@ void main(){
 (defmethod save-text ((editor editor))
   (let ((full (with-output-to-string (o)
                 (with-open-file (s (file editor))
-                  (loop repeat (or (start editor) 0)
+                  (loop repeat (1- (or (start editor) 0))
                         do (write-line (read-line s) o))
                   (format o "~&~a~%" (text editor))
                   (when (end editor)
@@ -210,5 +223,18 @@ void main(){
     (setf (text editor) (join-lines (lines editor)))
     (setf (col (cursor editor)) (+ col* (length text)))))
 
-(defun editor (source &key start end)
-  (enter-instance 'editor :file source :start start :end end))
+(define-handler (editor save) (ev)
+  (save-text editor))
+
+(define-handler (editor load) (ev)
+  (load-text editor))
+
+(define-handler (editor recompile) (ev)
+  (let ((*package* (ensure-package (name (slide-show *scene*)))))
+    (funcall (compile NIL `(lambda () (progn ,(read-from-string (text editor))))))))
+
+(defun editor (source &rest initargs)
+  (apply #'enter-instance 'editor
+         :file (merge-pathnames source
+                                (make-pathname :name NIL :type NIL :defaults (source (slide-show *slide*))))
+         initargs))

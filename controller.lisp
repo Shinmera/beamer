@@ -17,7 +17,7 @@
   (gamepad-release (one-of button :l1)))
 
 (define-action reload (slideshow)
-  (key-release (one-of key :f5 :r))
+  (key-release (one-of key :f5))
   (gamepad-release (one-of button :select)))
 
 (define-action exit (slideshow)
@@ -26,7 +26,8 @@
   (gamepad-release (one-of button :home)))
 
 (define-subject beamer-controller ()
-  ((display :initform NIL :accessor display :accessor slide-show))
+  ((display :initform NIL :accessor display :accessor slide-show)
+   (dragging :initform NIL :accessor dragging))
   (:default-initargs
    :name :controller))
 
@@ -48,3 +49,19 @@
 (define-handler (beamer-controller mapping T 100) (ev)
   (map-event ev *scene*)
   (retain-event ev))
+
+(define-handler (beamer-controller mouse-press) (ev button pos)
+  (when (eql button :left)
+    (let ((buffer (selection-buffer *scene*)))
+      (paint buffer buffer)
+      (setf (dragging beamer-controller) (object-at-point pos buffer)))))
+
+(define-handler (beamer-controller mouse-release) (ev button)
+  (when (eql button :left)
+    (setf (dragging beamer-controller) NIL)))
+
+(define-handler (beamer-controller mouse-move) (ev pos)
+  (when (dragging beamer-controller)
+    (let ((ratio (zoom (unit :camera *scene*))))
+      (setf (vx (location (dragging beamer-controller))) (/ (vx pos) ratio))
+      (setf (vy (location (dragging beamer-controller))) (/ (vy pos) ratio)))))
