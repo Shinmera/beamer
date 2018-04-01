@@ -66,18 +66,22 @@ void main(){
     color = vec4(1,1,1,1);
 }")
 
-(define-shader-subject editor (slide-text)
+(define-shader-subject editor (slide-text highlighted-text)
   ((file :initarg :file :accessor file)
    (lines :initform NIL :accessor lines)
    (start :initarg :start :accessor start)
    (end :initarg :end :accessor end)
-   (cursor :initform NIL :accessor cursor))
+   (cursor :initform NIL :accessor cursor)
+   (language :initarg :language :accessor language)
+   (theme :initarg :theme :accessor theme))
   (:default-initargs :font (asset 'beamer 'code)
                      :size 24
                      :wrap NIL
                      :start NIL
                      :end NIL
-                     :margin (vec2 0 24)))
+                     :margin (vec2 0 24)
+                     :language *lisp-tokens*
+                     :theme *monokai-theme*))
 
 (defmethod initialize-instance :after ((editor editor) &key file)
   (setf (cursor editor) (make-instance 'cursor :parent editor))
@@ -171,6 +175,11 @@ void main(){
       (loop for i from 1 below (length vec)
             do (format out "~%~a" (aref vec i))))))
 
+(defmethod (setf text) :before (text (editor editor))
+  (multiple-value-bind (base regions) (determine-regions text :tokens (language editor) :theme (theme editor))
+    (setf (color editor) base)
+    (setf (color-regions editor) regions)))
+
 (define-handler (editor key-release) (ev key)
   (with-accessors ((col col) (row row) (col* col*)) (cursor editor)
     (flet ((del ()
@@ -237,4 +246,8 @@ void main(){
   (apply #'enter-instance 'editor
          :file (merge-pathnames source
                                 (make-pathname :name NIL :type NIL :defaults (source (slide-show *slide*))))
+         :language (ecase (getf initargs :language)
+                     ((NIL) *lisp-tokens*)
+                     (:lisp *lisp-tokens*)
+                     (:glsl *glsl-tokens*))
          initargs))

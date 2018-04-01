@@ -49,13 +49,21 @@
 (defun p (text &rest initargs)
   (apply #'enter-instance 'paragraph :text (princ-to-string text) initargs))
 
-(define-shader-entity code (slide-text)
+(define-shader-entity code (slide-text highlighted-text)
   ()
   (:default-initargs :font (asset 'beamer 'code)
                      :margin (vec2 0 24)))
 
-(defun c (text &rest initargs)
-  (apply #'enter-instance 'code :text (princ-to-string text) initargs))
+(defun c (text &rest initargs &key (language :lisp) (theme :monokai) &allow-other-keys)
+  (let ((text (princ-to-string text)))
+    (remf initargs :language)
+    (remf initargs :theme)
+    (multiple-value-bind (base regions) (determine-regions text :tokens (ecase language
+                                                                          (:lisp *lisp-tokens*)
+                                                                          (:glsl *glsl-tokens*))
+                                                                :theme (ecase theme
+                                                                         (:monokai *monokai-theme*)))
+      (apply #'enter-instance 'code :text text :color base :color-regions regions initargs))))
 
 (define-asset (beamer bullet) mesh
     (make-sphere 6))

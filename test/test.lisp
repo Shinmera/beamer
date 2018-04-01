@@ -53,4 +53,4 @@
                   :color (vec 0.2 0.2 0.8))
   
   (editor "test.lisp" :start 40 :size 16)
-  (c (getf (effective-shaders 'cube) :fragment-shader) :size 16 :margin 0))
+  (c (getf (effective-shaders 'cube) :fragment-shader) :size 16 :margin 0 :language :glsl))

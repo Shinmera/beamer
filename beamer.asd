@@ -13,6 +13,7 @@
   :homepage "https://github.com/Shinmera/beamer"
   :serial T
   :components ((:file "package")
+               (:file "highlight")
                (:file "ui")
                (:file "slide-show")
                (:file "functions")
