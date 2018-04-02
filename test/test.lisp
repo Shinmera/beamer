@@ -17,10 +17,13 @@
    "Fart")
   (c "(michael-rosen:click :nice)"))
 
-(define-asset (trial::workbench cube) mesh
+(define-pool slide
+  :base :trial)
+
+(define-asset (slide cube) mesh
     (make-cube 100))
 
-(Define-asset (trial::workbench cat) image
+(Define-asset (slide cat) image
     #p"cat.png")
 
 (define-shader-subject cube (vertex-entity
@@ -43,12 +46,10 @@
   
   (enter-instance 'cube
                   :location (vec 600 200 0)
-                  :vertex-array (asset 'trial::workbench 'cube)
-                  :texture (asset 'trial::workbench 'cat)
+                  :vertex-array (asset 'slide 'cube)
+                  :texture (asset 'slide 'cat)
                   :color (vec 0.2 0.2 0.8))
   
-  (editor "test.lisp" :start 38 :end 49 :trim 2 :size 22 :language :lisp :margin (vec 0 20))
+  (editor "test.lisp" :start 41 :end 52 :trim 2 :size 22 :language :lisp :margin (vec 0 20))
   (p "Fragment Shader:" :size 30 :margin (vec 20 0 0 0))
-  (c (getf (effective-shaders 'cube) :fragment-shader) :size 22 :language :glsl)
-  ;;
-  )
+  (c (getf (effective-shaders 'cube) :fragment-shader) :size 22 :language :glsl))
