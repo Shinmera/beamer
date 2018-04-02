@@ -17,38 +17,38 @@
    "Fart")
   (c "(michael-rosen:click :nice)"))
 
-(define-slide cube
-  (define-asset (trial::workbench cube) mesh
-      (make-cube 100))
+(define-asset (trial::workbench cube) mesh
+    (make-cube 100))
 
-  (Define-asset (trial::workbench cat) image
-      #p"cat.png")
+(Define-asset (trial::workbench cat) image
+    #p"cat.png")
 
-  (define-shader-subject cube (slide-subject vertex-entity textured-entity)
-    ()
-    (:default-initargs
-     :vertex-array (asset 'trial::workbench 'cube)
-     :texture (asset 'trial::workbench 'cat)))
+(define-shader-subject cube (vertex-entity
+                             textured-entity
+                             colored-entity
+                             slide-subject)
+  ())
 
-  (define-handler (cube tick) (ev dt tt)
-    (incf (vx (rotation cube)) (* 10 dt))
-    (incf (vy (rotation cube)) dt))
-
-  (h "This is a cube")
-  (enter-instance 'cube))
+(define-handler (cube tick) (ev dt tt)
+  (incf (vx (rotation cube)) (* dt 0.1))
+  (incf (vy (rotation cube)) dt))
 
 (define-slide editor
+  (p "Lisp Source:" :size 30 :margin (vec 20 0 0 0))
   (define-shader-subject cube (vertex-entity
-                               textured-entity
-                               ;colored-entity
+  ;                             textured-entity
+  ;                             colored-entity
                                slide-subject)
     ())
-
+  
   (enter-instance 'cube
                   :location (vec 600 200 0)
                   :vertex-array (asset 'trial::workbench 'cube)
                   :texture (asset 'trial::workbench 'cat)
                   :color (vec 0.2 0.2 0.8))
   
-  (editor "test.lisp" :start 40 :size 18 :language :lisp)
-  (c (getf (effective-shaders 'cube) :fragment-shader) :size 18 :language :glsl))
+  (editor "test.lisp" :start 38 :end 49 :trim 2 :size 22 :language :lisp :margin (vec 0 20))
+  (p "Fragment Shader:" :size 30 :margin (vec 20 0 0 0))
+  (c (getf (effective-shaders 'cube) :fragment-shader) :size 22 :language :glsl)
+  ;;
+  )

@@ -17,6 +17,12 @@
 (define-action recompile (editor-keys)
   (key-press (and (eql key :c) (find :control modifiers))))
 
+(define-action forward (editor-keys)
+  (key-press (and (eql key :f) (find :control modifiers))))
+
+(define-action backward (editor-keys)
+  (key-press (and (eql key :b) (find :control modifiers))))
+
 (define-shader-entity cursor (vertex-entity)
   ((parent :initarg :parent :accessor parent)
    (col :initform 0 :accessor col)
@@ -71,6 +77,7 @@ void main(){
    (lines :initform NIL :accessor lines)
    (start :initarg :start :accessor start)
    (end :initarg :end :accessor end)
+   (trim :initarg :trim :accessor trim)
    (cursor :initform NIL :accessor cursor)
    (language :initarg :language :accessor language)
    (theme :initarg :theme :accessor theme))
@@ -79,7 +86,8 @@ void main(){
                      :wrap NIL
                      :start NIL
                      :end NIL
-                     :margin (vec2 0 24)
+                     :trim 0
+                     :margin (vec2 0 0)
                      :language *default-language*
                      :theme *default-theme*))
 
@@ -113,24 +121,27 @@ void main(){
   (with-open-file (s (file editor))
     (loop repeat (1- (or (start editor) 0))
           do (read-line s))
-    (let ((lines (make-array 0 :adjustable T :fill-pointer T)))
-      (setf (text editor)
-            (with-output-to-string (o)
-              (loop repeat (if (end editor)
-                               (- (end editor) (or (start editor) 0))
-                               most-positive-fixnum)
-                    for line = (read-line s NIL)
-                    while line
-                    do (write-line line o)
-                       (vector-push-extend line lines))))
-      (setf (lines editor) lines))))
+    (let ((lines (make-array 0 :adjustable T :fill-pointer T))
+          (trim (trim editor)))
+      (loop repeat (if (end editor)
+                       (- (end editor) (or (start editor) 0))
+                       most-positive-fixnum)
+            for line = (read-line s NIL)
+            while line
+            do (vector-push-extend (if (<= trim (length line))
+                                       (subseq line trim)
+                                       "")
+                                   lines))
+      (setf (lines editor) lines)
+      (setf (text editor) (join-lines lines)))))
 
 (defmethod save-text ((editor editor))
   (let ((full (with-output-to-string (o)
                 (with-open-file (s (file editor))
                   (loop repeat (1- (or (start editor) 0))
                         do (write-line (read-line s) o))
-                  (format o "~&~a~%" (text editor))
+                  (loop for line across (lines editor)
+                        do (format o "~v{ ~}~a~%" (trim editor) 0 line))
                   (when (end editor)
                     (loop repeat (- (end editor) (or (start editor) 0))
                           do (read-line s NIL))
@@ -227,7 +238,7 @@ void main(){
          (setf col (length (line editor row))))))))
 
 (define-handler (editor text-entered) (ev text)
-  (with-accessors ((pos pos) (col col) (col* col*) (row row)) (cursor editor)
+  (with-accessors ((col col) (col* col*) (row row)) (cursor editor)
     (setf (line editor row) (string-insert-pos (line editor row) col* text))
     (setf (text editor) (join-lines (lines editor)))
     (setf (col (cursor editor)) (+ col* (length text)))))
@@ -238,9 +249,36 @@ void main(){
 (define-handler (editor load) (ev)
   (load-text editor))
 
+(define-handler (editor forward) (ev)
+  ;; Primitive forward
+  (with-accessors ((col col) (col* col*) (row row)) (cursor editor)
+    (let* ((row (row (cursor editor)))
+           (col (col* (cursor editor)))
+           (line (line editor row)))
+      (cond ((or (<= (length line) col) (char= #\Space (char line col)))
+             (loop for c from col
+                   do (cond ((<= (length line) c)
+                             (when (= row (1- (length (lines editor))))
+                               (setf col c)
+                               (return))
+                             (incf row) (setf c 0))
+                            ((char/= #\Space (char line c))
+                             (setf col c)
+                             (return)))))
+            (T
+             (loop for c from col
+                   do (cond ((<= (length line) c)
+                             (setf col c)
+                             (return))
+                            ((char= #\Space (char line c))
+                             (setf col c)
+                             (return))))))
+      (setf (row (cursor editor)) row)
+      (setf (col (cursor editor)) col))))
+
 (define-handler (editor recompile) (ev)
   (let ((*package* (ensure-package (name (slide-show *scene*)))))
-    (funcall (compile NIL `(lambda () (progn ,(read-from-string (text editor))))))))
+    (cl:load (file editor))))
 
 (defun editor (source &rest initargs)
   (apply #'enter-instance 'editor
