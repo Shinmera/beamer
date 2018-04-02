@@ -38,8 +38,6 @@
   (enter-instance 'cube))
 
 (define-slide editor
-  (h "Hi there")
-
   (define-shader-subject cube (vertex-entity
                                textured-entity
                                ;colored-entity
@@ -47,10 +45,10 @@
     ())
 
   (enter-instance 'cube
-                  :location (vec 800 300 0)
+                  :location (vec 600 200 0)
                   :vertex-array (asset 'trial::workbench 'cube)
                   :texture (asset 'trial::workbench 'cat)
                   :color (vec 0.2 0.2 0.8))
   
-  (editor "test.lisp" :start 40 :size 16)
-  (c (getf (effective-shaders 'cube) :fragment-shader) :size 16 :margin 0 :language :glsl))
+  (editor "test.lisp" :start 40 :size 18 :language :lisp)
+  (c (getf (effective-shaders 'cube) :fragment-shader) :size 18 :language :glsl))

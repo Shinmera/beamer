@@ -80,8 +80,8 @@ void main(){
                      :start NIL
                      :end NIL
                      :margin (vec2 0 24)
-                     :language *lisp-tokens*
-                     :theme *monokai-theme*))
+                     :language *default-language*
+                     :theme *default-theme*))
 
 (defmethod initialize-instance :after ((editor editor) &key file)
   (setf (cursor editor) (make-instance 'cursor :parent editor))
@@ -176,7 +176,7 @@ void main(){
             do (format out "~%~a" (aref vec i))))))
 
 (defmethod (setf text) :before (text (editor editor))
-  (multiple-value-bind (base regions) (determine-regions text :tokens (language editor) :theme (theme editor))
+  (multiple-value-bind (base regions) (determine-regions text :language (language editor) :theme (theme editor))
     (setf (color editor) base)
     (setf (color-regions editor) regions)))
 
@@ -246,8 +246,4 @@ void main(){
   (apply #'enter-instance 'editor
          :file (merge-pathnames source
                                 (make-pathname :name NIL :type NIL :defaults (source (slide-show *slide*))))
-         :language (ecase (getf initargs :language)
-                     ((NIL) *lisp-tokens*)
-                     (:lisp *lisp-tokens*)
-                     (:glsl *glsl-tokens*))
          initargs))

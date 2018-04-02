@@ -52,18 +52,14 @@
 (define-shader-entity code (slide-text highlighted-text)
   ()
   (:default-initargs :font (asset 'beamer 'code)
-                     :margin (vec2 0 24)))
+                     :margin (vec2 0 24)
+                     :wrap NIL))
 
-(defun c (text &rest initargs &key (language :lisp) (theme :monokai) &allow-other-keys)
-  (let ((text (princ-to-string text)))
-    (remf initargs :language)
-    (remf initargs :theme)
-    (multiple-value-bind (base regions) (determine-regions text :tokens (ecase language
-                                                                          (:lisp *lisp-tokens*)
-                                                                          (:glsl *glsl-tokens*))
-                                                                :theme (ecase theme
-                                                                         (:monokai *monokai-theme*)))
-      (apply #'enter-instance 'code :text text :color base :color-regions regions initargs))))
+(defun c (text &rest initargs &key (language *default-language*) (theme *default-theme*) &allow-other-keys)
+  (remf initargs :language)
+  (remf initargs :theme)
+  (multiple-value-bind (base regions) (determine-regions text :language language :theme theme)
+    (apply #'enter-instance 'code :text text :color base :color-regions regions initargs)))
 
 (define-asset (beamer bullet) mesh
     (make-sphere 6))
