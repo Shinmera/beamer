@@ -108,3 +108,39 @@
 (defun items (&rest entries)
   (enter-instance 'items :entries entries))
 
+(define-shader-entity img (vertex-entity textured-entity ui-element)
+  ()
+  (:default-initargs
+   :margin (vec 10 20)
+   :vertex-array (asset 'trial 'trial::fullscreen-square)
+   :texture NIL))
+
+(defclass img-asset (texture)
+  ((file :initarg :file :accessor file))
+  (:default-initargs
+   :file (error "FILE required.")))
+
+(defmethod load ((image img-asset))
+  (unwind-protect
+       (let ((input (file image)))
+         (multiple-value-bind (bits width height)
+             (cl-soil:load-image (unlist input))
+           (setf (pixel-data image) bits)
+           (setf (width image) width)
+           (setf (height image) height))
+         (allocate image))
+    (mapcar #'cffi:foreign-free (enlist (pixel-data image)))))
+
+(defmethod (setf width) :after (width (img img))
+  (let* ((texture (texture img))
+         (aspect (/ (height texture) (width texture))))
+    (setf (height img) (* aspect width))))
+
+(defmethod paint ((img img) target)
+  (with-pushed-matrix (model-matrix)
+    (translate-by (/ (width img) 2) (/ (height img) -2) 0)
+    (scale-by (/ (width img) 2) (/ (height img) 2) 1)
+    (call-next-method)))
+
+(defun image (file)
+  (enter-instance 'img :texture (make-instance 'img-asset :file (slide-file file))))

@@ -124,7 +124,7 @@ void main(){
     (let ((lines (make-array 0 :adjustable T :fill-pointer T))
           (trim (trim editor)))
       (loop repeat (if (end editor)
-                       (- (end editor) (or (start editor) 0))
+                       (- (1+ (end editor)) (or (start editor) 0))
                        most-positive-fixnum)
             for line = (read-line s NIL)
             while line
@@ -143,7 +143,7 @@ void main(){
                   (loop for line across (lines editor)
                         do (format o "~v{ ~}~a~%" (trim editor) 0 line))
                   (when (end editor)
-                    (loop repeat (- (end editor) (or (start editor) 0))
+                    (loop repeat (- (1+ (end editor)) (or (start editor) 0))
                           do (read-line s NIL))
                     (loop for line = (read-line s NIL)
                           while line
@@ -282,6 +282,5 @@ void main(){
 
 (defun editor (source &rest initargs)
   (apply #'enter-instance 'editor
-         :file (merge-pathnames source
-                                (make-pathname :name NIL :type NIL :defaults (source (slide-show *slide*))))
+         :file (slide-file source)
          initargs))

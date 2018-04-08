@@ -16,7 +16,8 @@
    #:c
    #:code
    #:items
-   #:editor)
+   #:editor
+   #:imagerepl)
   ;; main.lisp
   (:export
    #:start-slideshow

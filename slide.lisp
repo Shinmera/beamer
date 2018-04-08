@@ -61,3 +61,6 @@
              (with-context (*context*) (,constructor))
              (,constructor))
          (setf (slide ',name) *slide*)))))
+
+(defun slide-file (path &optional (slide *slide*))
+  (merge-pathnames path (make-pathname :name NIL :type NIL :defaults (source (slide-show slide)))))
