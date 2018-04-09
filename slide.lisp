@@ -62,11 +62,13 @@
 
 (defmacro define-slide (name &body body)
   (let ((constructor (gensym "SCENE-CONSTRUCTOR")))
-    `(flet ((,constructor ()
-              ,@body))
-       (setf (slide ',name) (make-instance 'slide :name ',name
-                                                  :slide-show (current-show)
-                                                  :constructor #',constructor)))))
+    (form-fiddle:with-body-options (body opts) body
+      `(flet ((,constructor ()
+                ,@body))
+         (setf (slide ',name) (make-instance 'slide :name ',name
+                                                    :slide-show (current-show)
+                                                    :constructor #',constructor
+                                                    ,@opts))))))
 
 (defun slide-file (path &optional (slide *slide*))
   (merge-pathnames path (make-pathname :name NIL :type NIL :defaults (source (slide-show slide)))))

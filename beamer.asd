@@ -22,7 +22,8 @@
                (:file "controller"))
   :defsystem-depends-on (:deploy)
   :depends-on (:trial-glfw
-               :array-utils)
+               :array-utils
+               :form-fiddle)
   :build-operation "deploy-op"
   :build-pathname "beamer"
   :entry-point "beamer:toplevel")
