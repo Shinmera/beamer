@@ -142,5 +142,6 @@
     (scale-by (/ (width img) 2) (/ (height img) 2) 1)
     (call-next-method)))
 
-(defun image (file)
-  (enter-instance 'img :texture (make-instance 'img-asset :file (slide-file file))))
+(defun image (file &rest initargs)
+  (apply #'enter-instance 'img :texture (make-instance 'img-asset :file (slide-file file))
+         initargs))

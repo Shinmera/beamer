@@ -82,6 +82,9 @@
   :construct "\\b(block|let*|return-from|catch|load-time-value|setq|eval-when|locally|symbol-macrolet|flet|macrolet|tagbody|function|multiple-value-call|the|go|multiple-value-prog1|throw|if|progn|unwind-protect|labels|progv|let|quote|defclass|defconstant|defgeneric|defmacro|defmethod|defpackage|defparameter|defsetf|defstruct|deftype|defun|defvar|define-[^\\s]+)\\b"
   :keyword "&(whole|environment|optional|key|rest|body|allow-other-keys|aux)|(^|[^:\\w]):[\\w\\d-]+")
 
+(define-language :link
+  :construct ".*")
+
 (defun determine-regions (text &key (language *default-language*) (theme *default-theme*))
   (let ((regions ())
         (language (language language))
