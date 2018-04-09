@@ -34,13 +34,24 @@
   (enter (apply #'make-instance class initargs)
          (or *slide* (error "Not in a slide!"))))
 
-(defmethod reconstruct-slide ((slide slide))
+(defmethod setup-scene ((show slide-show) (slide slide))
   (let ((*package* (find-package (name (slide-show slide))))
-        (*slide* (make-instance 'slide :name (name slide)
-                                       :slide-show (slide-show slide)
-                                       :constructor (constructor slide))))
+        (*slide* slide))
+    (setf (width slide) (width *context*))
+    (setf (height slide) (height *context*))
+    (for:for ((item over slide))
+      (unless (or (eq item (selection-buffer slide))
+                  (typep item 'render-pass)
+                  (typep item 'slide-camera))
+        (leave item slide)))
     (funcall (constructor slide))
-    *slide*))
+    (child-changed slide T)
+    slide))
+
+(defmethod reconstruct-slide ((slide slide))
+  (make-instance 'slide :name (name slide)
+                        :slide-show (slide-show slide)
+                        :constructor (constructor slide)))
 
 (defmethod resize :after ((slide slide) width height)
   (let ((ratio (/ 600 height)))
@@ -53,14 +64,9 @@
   (let ((constructor (gensym "SCENE-CONSTRUCTOR")))
     `(flet ((,constructor ()
               ,@body))
-       (let ((*layout-update-in-progress* T)
-             (*slide* (make-instance 'slide :name ',name
-                                            :slide-show (current-show)
-                                            :constructor #',constructor)))
-         (if *context*
-             (with-context (*context*) (,constructor))
-             (,constructor))
-         (setf (slide ',name) *slide*)))))
+       (setf (slide ',name) (make-instance 'slide :name ',name
+                                                  :slide-show (current-show)
+                                                  :constructor #',constructor)))))
 
 (defun slide-file (path &optional (slide *slide*))
   (merge-pathnames path (make-pathname :name NIL :type NIL :defaults (source (slide-show slide)))))

@@ -41,7 +41,7 @@
 
 (define-handler (beamer-controller reload) (ev)
   (change-scene (slide-show beamer-controller)
-                (reconstruct-slide (current-slide (slide-show beamer-controller)))))
+                (current-slide (slide-show beamer-controller))))
 
 (define-handler (beamer-controller exit) (ev)
   (quit *context*))
