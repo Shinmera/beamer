@@ -37,8 +37,9 @@
    (controller :initform (make-instance 'beamer-controller))
    (source :initarg :source :accessor source)
    (slides :initform (make-array 0 :adjustable T :fill-pointer T) :accessor slides)
-   (index :initform -1 :accessor index))
+   (index :initarg :index :accessor index))
   (:default-initargs
+   :index 0
    :clear-color (vec 20/255 25/255 28/255)))
 
 (defmethod initialize-instance ((show slide-show) &key slides source)
@@ -51,7 +52,6 @@
       (cl:load source))
     (dolist (slide slides)
       (vector-push-extend slide (slides show)))
-    (setf (slot-value show 'index) 0)
     (setf (scene show) (current-slide show))))
 
 (defmethod print-object ((show slide-show) stream)
@@ -114,8 +114,8 @@
     (when pos
       (setf (slide pos show) null))))
 
-(defun start-slideshow (path)
-  (launch 'slide-show :source path))
+(defun start-slideshow (path &key (index 0))
+  (launch 'slide-show :source path :index index))
 
 (defun toplevel ()
   (let ((path (first (uiop:command-line-arguments))))
