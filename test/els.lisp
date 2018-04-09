@@ -4,7 +4,8 @@
 (define-shader-subject slide-subject (vertex-entity located-entity rotated-entity selectable)
   ()
   (:default-initargs
-   :location (vec 600 200 100)))
+   :location (vec 600 200 100)
+   :rotation (vec (/ PI -2) 0 0)))
 
 (defmethod initialize-instance :after ((subject slide-subject) &key &allow-other-keys))
 
@@ -105,8 +106,7 @@ void main() {
     ())
 
   (define-handler (teapot tick) (ev dt tt)
-    (incf (vz (rotation teapot)) dt)
-    (setf (vx (rotation teapot)) (/ PI -2)))
+    (incf (vz (rotation teapot)) dt))
 
   (remove-class-shader :fragment-shader 'teapot)
   (enter-instance 'teapot :vertex-array (asset 'els 'teapot))
