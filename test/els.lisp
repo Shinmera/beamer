@@ -31,13 +31,17 @@
   (p "@Shinmera" :margin (vec 302 0))
   (c "https://shinmera.com" :language :link :size 32 :margin (vec 220 30)))
 
+(define-slide intro-image
+  (h "Modern Graphics")
+  (image #p"old-to-modern.png" :margin (vec 0 70)))
+
 (define-slide intro
   (h "Introduction to Modern Graphics")
   (items
    "CPU <-> GPU sync is slow"
    "Upload as much ahead of time as possible"
-   "When drawing everything is done GPU-side"
-   "Customise drawing behaviour through code"))
+   "When drawing, everything is done GPU-side"
+   "Customise drawing behaviour through shaders"))
 
 (define-slide glsl
   (h "GLSL")
@@ -51,9 +55,9 @@
   (c "out vec4 color;
 
 void main() {
-  vec3 p = gl_FragCoord.xyz;
+  vec4 p = gl_FragCoord;
   color.gb *= clamp(abs(pow(tan((p.y+p.x)/50)+1, 20)), 0, 1);
-  color.rgb *= 1-p.z*2000-1998.4;
+  color.rgb *= -p.z/2+0.5;
 }" :language :glsl :size 24))
 
 (define-slide pipeline
@@ -64,8 +68,8 @@ void main() {
   (h "Here's the Problem")
   (items
    "Want to define behaviour modularly"
-   "Want to die draw behaviour to objects"
-   "Only one program per stage at a time"))
+   "Want to tie draw behaviour to objects"
+   "But, only one program per stage at a time"))
 
 (define-slide solution
   (h "Here's a Solution")
@@ -81,6 +85,33 @@ void main() {
    "Implements a full GLSL 4.1 parser"
    "GLSL code-walker for semantic analysis"
    "User just calls MERGE-SHADER-SOURCES"))
+
+(define-slide glsl-toolkit-example
+  (h "GLSL-Toolkit")
+  (c "(glsl-toolkit:parse \"out vec4 color;
+
+void main() {
+  vec4 p = gl_FragCoord;
+  color.gb *= clamp(abs(pow(tan((p.y+p.x)/50)+1, 20)), 0, 1);
+  color.rgb *= -p.z/2+0.5;
+}\")
+
+;=> 
+
+(GLSL-TOOLKIT:SHADER
+ (GLSL-TOOLKIT:VARIABLE-DECLARATION (GLSL-TOOLKIT:TYPE-QUALIFIER :OUT)
+  (GLSL-TOOLKIT:TYPE-SPECIFIER :VEC4) \"color\" GLSL-TOOLKIT:NO-VALUE)
+ (GLSL-TOOLKIT:FUNCTION-DEFINITION
+  (GLSL-TOOLKIT:FUNCTION-PROTOTYPE GLSL-TOOLKIT:NO-VALUE
+   (GLSL-TOOLKIT:TYPE-SPECIFIER :VOID) \"main\")
+  (GLSL-TOOLKIT:COMPOUND-STATEMENT
+   (GLSL-TOOLKIT:VARIABLE-DECLARATION GLSL-TOOLKIT:NO-VALUE
+    (GLSL-TOOLKIT:TYPE-SPECIFIER :VEC4) \"p\" GLSL-TOOLKIT:NO-VALUE
+    \"gl_FragCoord\")
+   (GLSL-TOOLKIT:ASSIGNMENT
+    (GLSL-TOOLKIT:MODIFIED-REFERENCE \"color\"
+     (GLSL-TOOLKIT:FIELD-MODIFIER \"gb\"))
+    :*= ...))))" :language :lisp :size 24))
 
 (define-slide where-lisp
   (h "Where's the Lisp?"))
@@ -163,3 +194,6 @@ void main() {
    "Optimisation passes"
    "Offer automatic correction for problems"
    "More exploration of composition strategies"))
+
+(define-slide questions
+  (H "Questions"))
