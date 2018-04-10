@@ -34,7 +34,9 @@
 (defmethod compute-resources ((controller beamer-controller) resources readying cache))
 
 (define-handler (beamer-controller next) (ev)
-  (next-slide (slide-show beamer-controller)))
+  (if (at-end-p (slide-show beamer-controller))
+      (quit *context*)
+      (next-slide (slide-show beamer-controller))))
 
 (define-handler (beamer-controller prev) (ev)
   (prev-slide (slide-show beamer-controller)))

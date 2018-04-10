@@ -79,6 +79,9 @@
   (setf (index show) (max 0 (min (+ (index show) by) (1- (length (slides show))))))
   (current-slide show))
 
+(defmethod at-end-p ((show slide-show))
+  (<= (length (slides show)) (1+ (index show))))
+
 (defmethod next-slide ((show slide-show))
   (advance-slide show 1))
 
