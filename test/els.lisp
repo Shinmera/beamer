@@ -4,8 +4,8 @@
 (define-shader-subject slide-subject (vertex-entity located-entity rotated-entity selectable)
   ()
   (:default-initargs
-   :location (vec 600 200 100)
-   :rotation (vec (/ PI -2) 0 0)))
+   :location (vec 600 100 100)
+   :rotation (vec (/ PI -2) 0 0))) ;; FIXME: COLOR
 
 (defmethod initialize-instance :after ((subject slide-subject) &key &allow-other-keys))
 
@@ -141,7 +141,7 @@ void main() {
 
   (remove-class-shader :fragment-shader 'teapot)
   (enter-instance 'teapot :vertex-array (asset 'els 'teapot))
-  (editor "els.lisp" :start 104 :end 109 :language :lisp :trim 2 :margin (vec 0 20)))
+  (editor "els.lisp" :start 136 :end 140 :language :lisp :trim 2 :margin (vec 0 20)))
 
 (define-slide teapot-shader
   (h "A Simple Fragment Shader")
@@ -159,7 +159,7 @@ void main() {
   }")
 
   (enter-instance 'teapot :vertex-array (asset 'els 'teapot))
-  (editor "els.lisp" :start 118 :end 128 :language :lisp :trim 2 :margin (vec 0 20)))
+  (editor "els.lisp" :start 149 :end 159 :language :lisp :trim 2 :margin (vec 0 20)))
 
 (define-slide teapot-mixins
   (remove-class-shader :fragment-shader 'teapot)
@@ -171,10 +171,9 @@ void main() {
     ())
 
   (enter-instance 'teapot :vertex-array (asset 'els 'teapot)
-                          :texture (asset 'els 'wall)
-                          :color (vec 0 0 1 1))
+                          :texture (asset 'els 'wall))
   (p "Lisp Source:" :size 30 :margin (vec 20 0 0 0))
-  (editor "els.lisp" :start 136 :end 140 :trim 2 :size 22 :language :lisp :margin (vec 0 20))
+  (editor "els.lisp" :start 167 :end 171 :trim 2 :size 22 :language :lisp :margin (vec 0 20))
   
   (p "Fragment Shader:" :size 30 :margin (vec 20 0 0 0))
   (c (getf (effective-shaders 'teapot) :fragment-shader) :size 22 :language :glsl))
