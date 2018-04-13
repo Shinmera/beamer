@@ -34,6 +34,7 @@
 
 (defclass slide-show (main)
   ((scene :initform NIL)
+   (clock :initform 0.0 :accessor clock)
    (controller :initform (make-instance 'beamer-controller))
    (source :initarg :source :accessor source)
    (slides :initform (make-array 0 :adjustable T :fill-pointer T) :accessor slides)
@@ -64,6 +65,17 @@
   (map NIL #'finalize (slides show)))
 
 (defmethod setup-scene ((show slide-show) scene))
+
+(defun format-clock (clock)
+  (let ((clock (round clock)))
+    (format NIL "~2d:~2,'0d" (floor clock 60) (mod clock 60))))
+
+(defmethod change-scene :before ((show slide-show) scene)
+  (incf (clock show) (clock (scene show)))
+  (format T "~& ~2d/~2d (~3d%)   ~a (+~a)~%"
+          (1+ (index show)) (length (slides show))
+          (round (/ (1+ (index show)) (length (slides show)) 0.01))
+          (format-clock (clock show)) (format-clock (clock (scene show)))))
 
 (defmethod change-scene :around ((show slide-show) scene)
   (with-context ((context show))
@@ -117,8 +129,14 @@
     (when pos
       (setf (slide pos show) null))))
 
-(defun start-slideshow (path &key (index 0))
-  (launch 'slide-show :source path :index index))
+(defun start-slideshow (path &key (index 0) (muffle-logging T))
+  (if muffle-logging
+      (let ((level (v:repl-level)))
+        (setf (v:repl-level) :error)
+        (unwind-protect
+             (launch 'slide-show :source path :index index)
+          (setf (v:repl-level) level)))
+      (launch 'slide-show :source path :index index)))
 
 (defun toplevel ()
   (let ((path (first (uiop:command-line-arguments))))
