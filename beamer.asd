@@ -10,7 +10,9 @@
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
   :description "A slide show software based on Trail"
-  :homepage "https://github.com/Shinmera/beamer"
+  :homepage "https://Shinmera.github.io/beamer/"
+  :bug-tracker "https://github.com/Shinmera/beamer/issues"
+  :source-control (:git "https://github.com/Shinmera/beamer.git")
   :serial T
   :components ((:file "package")
                (:file "highlight")
