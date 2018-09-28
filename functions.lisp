@@ -115,25 +115,10 @@
    :vertex-array (asset 'trial 'trial::fullscreen-square)
    :texture NIL))
 
-(defclass img-asset (texture)
-  ((file :initarg :file :accessor file))
-  (:default-initargs
-   :file (error "FILE required.")))
-
-(defmethod load ((image img-asset))
-  (unwind-protect
-       (let ((input (file image)))
-         (multiple-value-bind (bits width height)
-             (cl-soil:load-image (unlist input))
-           (setf (pixel-data image) bits)
-           (setf (width image) width)
-           (setf (height image) height))
-         (allocate image))
-    (mapcar #'cffi:foreign-free (enlist (pixel-data image)))))
-
 (defmethod (setf width) :after (width (img img))
   (let* ((texture (texture img))
-         (aspect (/ (height texture) (width texture))))
+         (aspect (/ (or (height texture) 1)
+                    (or (width texture) 1))))
     (setf (height img) (* aspect width))))
 
 (defmethod paint ((img img) target)
@@ -143,5 +128,5 @@
     (call-next-method)))
 
 (defun image (file &rest initargs)
-  (apply #'enter-instance 'img :texture (make-instance 'img-asset :file (slide-file file))
+  (apply #'enter-instance 'img :texture (make-instance 'image :input (slide-file file) :pool NIL)
          initargs))
