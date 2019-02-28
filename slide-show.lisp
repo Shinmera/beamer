@@ -70,14 +70,14 @@
   (let ((clock (round clock)))
     (format NIL "~2d:~2,'0d" (floor clock 60) (mod clock 60))))
 
-(defmethod change-scene :before ((show slide-show) scene)
+(defmethod change-scene :before ((show slide-show) scene &key old)
   (incf (clock show) (clock (scene show)))
   (format T "~& ~2d/~2d (~3d%)   ~a (+~a)~%"
           (1+ (index show)) (length (slides show))
           (round (/ (1+ (index show)) (length (slides show)) 0.01))
           (format-clock (clock show)) (format-clock (clock (scene show)))))
 
-(defmethod change-scene :around ((show slide-show) scene)
+(defmethod change-scene :around ((show slide-show) scene &key old)
   (with-context ((context show))
     (call-next-method)))
 
