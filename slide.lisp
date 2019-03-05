@@ -18,11 +18,9 @@
 
 (defclass slide (pipelined-scene pane)
   ((slide-show :initarg :slide-show :reader slide-show)
-   (constructor :initarg :constructor :accessor constructor)
-   (selection-buffer :initform NIL :accessor selection-buffer)))
+   (constructor :initarg :constructor :accessor constructor)))
 
 (defmethod initialize-instance :after ((slide slide) &key)
-  (setf (selection-buffer slide) (make-instance 'selection-buffer :scene slide :width 800 :height 600))
   (enter (make-instance 'slide-camera :name :camera) slide)
   (enter (make-instance 'render-pass) slide))
 
@@ -40,8 +38,7 @@
     (setf (width slide) (width *context*))
     (setf (height slide) (height *context*))
     (for:for ((item over slide))
-      (unless (or (eq item (selection-buffer slide))
-                  (typep item 'render-pass)
+      (unless (or (typep item 'render-pass)
                   (typep item 'slide-camera))
         (leave item slide)))
     (funcall (constructor slide))
