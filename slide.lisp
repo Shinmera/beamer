@@ -30,8 +30,10 @@
   (print-unreadable-object (slide stream :type T)
     (format stream "~a/~a" (name (slide-show slide)) (name slide))))
 
-(defun enter-instance (class &rest initargs)
-  (enter (apply #'make-instance class initargs)
+(defun enter-instance (instance/class &rest initargs)
+  (enter (etypecase instance/class
+           ((or class symbol) (apply #'make-instance instance/class initargs))
+           (standard-object instance/class))
          (or *slide* (error "Not in a slide!"))))
 
 (defmethod setup-scene ((show slide-show) (slide slide))
