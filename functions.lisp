@@ -130,3 +130,6 @@
 (defun image (file &rest initargs)
   (apply #'enter-instance 'img :texture (make-instance 'image :input (slide-file file) :pool NIL)
          initargs))
+
+(defun note (format &rest format-args)
+  (format T "~&    NOTE: ~?~%" format format-args))
