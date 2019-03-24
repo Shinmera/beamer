@@ -21,8 +21,10 @@
    (constructor :initarg :constructor :accessor constructor)))
 
 (defmethod initialize-instance :after ((slide slide) &key)
-  (enter (make-instance 'slide-camera :name :camera) slide)
-  (enter (make-instance 'render-pass) slide))
+  (unless (unit :camera slide)
+    (enter (make-instance 'slide-camera :name :camera) slide))
+  (unless (nodes slide)
+    (enter (make-instance 'render-pass) slide)))
 
 (defmethod print-object ((slide slide) stream)
   (print-unreadable-object (slide stream :type T)
