@@ -21,6 +21,9 @@
     #p"Triplicate T4 Code Regular.ttf"
   :size 48 :oversample 2)
 
+(define-asset (beamer rect) mesh
+    (make-rectangle 1 1 :align :bottomleft))
+
 (define-shader-entity slide-text (text ui-element)
   ()
   (:default-initargs
@@ -98,21 +101,25 @@
   (with-pushed-matrix (model-matrix)
     (translate-by 0 (- (height items)) 0)
     (for:for ((item over items))
-      (with-pushed-matrix (model-matrix)
-        (translate-by (/ (vx (padding (layout items))) 2)
-                      (- (vy (location item)) (/ (size item) 2))
-                      0)
-        (paint (bullet items) target))
+      (when (bullet items)
+        (with-pushed-matrix (model-matrix)
+          (translate-by (/ (vx (padding (layout items))) 2)
+                        (- (vy (location item)) (/ (size item) 2))
+                        0)
+          (paint (bullet items) target)))
       (paint item target))))
 
-(defun items (&rest entries)
-  (enter-instance 'items :entries entries))
+(defun items (&rest body)
+  (form-fiddle:with-body-options (entries opts (bullet-points T)) body
+    (if bullet-points
+        (enter-instance 'items :entries entries)
+        (enter-instance 'items :entries entries :bullet NIL))))
 
 (define-shader-entity img (vertex-entity textured-entity ui-element)
   ()
   (:default-initargs
    :margin (vec 10 20)
-   :vertex-array (asset 'trial 'trial::fullscreen-square)
+   :vertex-array (asset 'beamer 'rect)
    :texture NIL))
 
 (defmethod (setf width) :after (width (img img))
@@ -123,8 +130,7 @@
 
 (defmethod paint ((img img) target)
   (with-pushed-matrix (model-matrix)
-    (translate-by (/ (width img) 2) (/ (height img) -2) 0)
-    (scale-by (/ (width img) 2) (/ (height img) 2) 1)
+    (scale-by (width img) (height img) 1)
     (call-next-method)))
 
 (defun image (file &rest initargs)

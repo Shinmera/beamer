@@ -81,7 +81,7 @@
   (with-context ((context show))
     (call-next-method)))
 
-(defmethod (setf index) :after (value (show slide-show))
+(defmethod (setf index) :before (value (show slide-show))
   (change-scene show (aref (slides show) value)))
 
 (defmethod current-slide ((show slide-show))
