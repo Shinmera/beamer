@@ -41,7 +41,9 @@
    (index :initarg :index :accessor index))
   (:default-initargs
    :index 0
-   :clear-color (vec 20/255 25/255 28/255)))
+   :clear-color (vec 0 0 0 0)
+   ;;(vec 20/255 25/255 28/255 0)
+   ))
 
 (defmethod initialize-instance ((show slide-show) &key slides source)
   (call-next-method)
