@@ -130,12 +130,19 @@
 
 (defmethod paint ((img img) target)
   (with-pushed-matrix (model-matrix)
-    (scale-by (width img) (height img) 1)
-    (call-next-method)))
+    (with-pushed-attribs
+      (disable :cull-face)
+      (translate-by 0 (- (height img)) 0)
+      (scale-by (width img) (- (height img)) 1)
+      (call-next-method))))
 
 (defun image (file &rest initargs)
   (apply #'enter-instance 'img :texture (make-instance 'image :input (slide-file file) :pool NIL)
          initargs))
 
+(defmacro on-show (&body body)
+  `(push (lambda () ,@body) (on-show-functions *slide*)))
+
 (defun note (format &rest format-args)
-  (format T "~&    NOTE: ~?~%" format format-args))
+  (push (lambda () (format T "~&    NOTE: ~?~%" format format-args))
+        (on-show-functions *slide*)))

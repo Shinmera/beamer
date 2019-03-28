@@ -18,6 +18,7 @@
    #:items
    #:editor
    #:image
+   #:on-show
    #:note)
   ;; main.lisp
   (:export
@@ -48,7 +49,7 @@
   (:nicknames #:org.shirakumo.beamer.user)
   (:import-from #:cl #:in-package #:use-package))
 
-(dolist (name '(#:define-slide #:enter-instance #:p #:h #:c #:items #:editor #:image #:note))
+(dolist (name '(#:define-slide #:enter-instance #:p #:h #:c #:items #:editor #:image #:on-show #:note))
   (let ((symbol (find-symbol (string name) '#:org.shirakumo.beamer)))
     (import symbol '#:org.shirakumo.beamer.user)))
 
