@@ -38,12 +38,12 @@
    (controller :initform (make-instance 'beamer-controller))
    (source :initarg :source :accessor source)
    (slides :initform (make-array 0 :adjustable T :fill-pointer T) :accessor slides)
-   (index :initarg :index :accessor index))
+   (index :initarg :index :accessor index)
+   (max-time :initarg :max-time :accessor max-time))
   (:default-initargs
    :index 0
-   :clear-color (vec 0 0 0 0)
-   ;;(vec 20/255 25/255 28/255 0)
-   ))
+   :max-time NIL
+   :clear-color (vec 20/255 25/255 28/255 0)))
 
 (defmethod initialize-instance ((show slide-show) &key slides source)
   (call-next-method)
@@ -73,11 +73,14 @@
     (format NIL "~2d:~2,'0d" (floor clock 60) (mod clock 60))))
 
 (defmethod change-scene :before ((show slide-show) scene &key old)
+  (declare (ignore old))
   (incf (clock show) (clock (scene show)))
-  (format T "~& ~2d/~2d (~3d%)   ~a (+~a)~%"
+  (format T "~&~% ~2d/~2d (~3d%)   ~a~@[ -~a~] (+~a)~%"
           (1+ (index show)) (length (slides show))
           (round (/ (1+ (index show)) (length (slides show)) 0.01))
-          (format-clock (clock show)) (format-clock (clock (scene show)))))
+          (format-clock (clock show))
+          (when (max-time show) (format-clock (- (max-time show) (clock show))))
+          (format-clock (clock (scene show)))))
 
 (defmethod change-scene :around ((show slide-show) scene &key old)
   (with-context ((context show))

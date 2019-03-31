@@ -146,3 +146,6 @@
 (defun note (format &rest format-args)
   (push (lambda () (format T "~&    NOTE: ~?~%" format format-args))
         (on-show-functions *slide*)))
+
+(defun show-time (minutes)
+  (setf (max-time (current-show)) (* 60 minutes)))
