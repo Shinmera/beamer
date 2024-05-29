@@ -1,15 +1,5 @@
 (in-package #:org.shirakumo.beamer)
 
-(define-subject slide-camera (2d-camera)
-  ((zoom :initarg :zoom :accessor zoom))
-  (:default-initargs :zoom 1.0))
-
-(defmethod project-view ((camera slide-camera) ev)
-  (let ((z (zoom camera)))
-    (reset-matrix *view-matrix*)
-    (scale-by z z z *view-matrix*)
-    (translate (v- (location camera)) *view-matrix*)))
-
 (defclass slide (pipelined-scene pane)
   ((slide-show :initarg :slide-show :reader slide-show)
    (constructor :initarg :constructor :accessor constructor)
@@ -20,7 +10,7 @@
         (*slide* slide))
     (funcall (constructor slide))
     (unless (unit :camera slide)
-      (enter (make-instance 'slide-camera :name :camera) slide))
+      (enter (make-instance 'sidescroll-camera :name :camera) slide))
     (unless (nodes slide)
       (enter (make-instance 'render-pass) slide))))
 
@@ -52,7 +42,7 @@
   (let ((ratio (/ 600 height)))
     (setf (slot-value slide 'width) (* ratio width))
     (setf (slot-value slide 'height) (* ratio height))
-    (when (typep (unit :camera slide) 'slide-camera)
+    (when (typep (unit :camera slide) 'sidescroll-camera)
       (setf (zoom (unit :camera slide)) (/ ratio)))
     (child-changed (pane slide) slide)))
 

@@ -23,17 +23,12 @@
              (list ,@(loop for (k v) on parts by #'cddr
                            collect k collect `(let ((,g ,v))
                                                 (etypecase ,g
-                                                  (string (hex->vec (parse-integer ,g :radix 16)))
-                                                  (number (hex->vec ,g))
-                                                  (vec3 (vec4 (vx ,g) (vy ,g) (vz ,g) 1))
-                                                  (vec4 ,g))))))
+                                                  (string (hex->color (parse-integer ,g :radix 16)))
+                                                  (number (hex->color ,g))
+                                                  (colored:color ,g)
+                                                  (vec3 (colored:color (vx ,g) (vy ,g) (vz ,g)))
+                                                  (vec4 (colored:color (vx ,g) (vy ,g) (vz ,g) (vw ,g))))))))
        ',name)))
-
-(defun hex->vec (hex)
-  (vec4 (/ (ldb (byte 8 16) hex) 255)
-        (/ (ldb (byte 8 8) hex) 255)
-        (/ (ldb (byte 8 0) hex) 255)
-        1))
 
 (defmethod language ((name symbol))
   (multiple-value-bind (v p) (gethash name *languages*)
@@ -85,7 +80,7 @@
         (theme (theme theme)))
     (flet ((parse (regex color)
              (cl-ppcre:do-matches (s e regex text)
-               (push (list s e color) regions))))
+               (push (list s e (list :color color)) regions))))
       (loop for (key regex) on language by #'cddr
             for color = (getf theme key)
             do (when color (parse regex color))))

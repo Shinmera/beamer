@@ -3,18 +3,6 @@
 (defvar *slide-show-map* (make-hash-table :test 'eq))
 (defvar *slide*)
 
-(defun split-body-options (body)
-  (values (loop for list = body then rest
-                for (key val . rest) = list
-                while (and (cdr list) (keywordp key))
-                collect key collect val
-                finally (setf body list))
-          body))
-
-(defun ensure-package (name)
-  (or (find-package name)
-      (make-package name :use '(#:org.shirakumo.beamer.user))))
-
 (defun current-show (&optional (package *package*))
   (or (gethash (find-package package) *slide-show-map*)
       (error "~a is not a slide show." package)))
@@ -26,10 +14,14 @@
         (remhash package *slide-show-map*)))
   show)
 
+(define-action next (trial-alloy:ui-actions))
+(define-action prev (trial-alloy:ui-actions))
+(define-action reload (trial-alloy:ui-actions))
+(define-action exit (trial-alloy:ui-actions))
+
 (defclass slide-show (main)
   ((scene :initform NIL)
    (clock :initform 0.0 :accessor clock)
-   (controller :initform (make-instance 'beamer-controller))
    (source :initarg :source :accessor source)
    (slides :initform (make-array 0 :adjustable T :fill-pointer T) :accessor slides)
    (index :initarg :index :accessor index)
@@ -61,10 +53,6 @@
   (map NIL #'finalize (slides show)))
 
 (defmethod setup-scene ((show slide-show) scene))
-
-(defun format-clock (clock)
-  (let ((clock (round clock)))
-    (format NIL "~2d:~2,'0d" (floor clock 60) (mod clock 60))))
 
 (defmethod change-scene :before ((show slide-show) scene &key old)
   (declare (ignore old))
@@ -142,3 +130,17 @@
     (if path
         (start-slideshow path)
         (error "Please pass a path to a slide show directory."))))
+
+(define-handler (slide-show next) (ev)
+  (if (at-end-p slide-show)
+      (quit *context*)
+      (next-slide slide-show)))
+
+(define-handler (slide-show prev) (ev)
+  (prev-slide slide-show))
+
+(define-handler (slide-show reload) (ev)
+  (change-scene slide-show (current-slide slide-show)))
+
+(define-handler (slide-show exit) (ev)
+  (quit *context*))
