@@ -1,6 +1,6 @@
 (in-package #:org.shirakumo.beamer)
 
-(define-global +app-system+ "weiss")
+(define-global +app-system+ "beamer")
 
 (defun read-until (end input &optional (key #'identity))
   (etypecase end

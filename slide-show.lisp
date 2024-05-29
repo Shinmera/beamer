@@ -14,11 +14,6 @@
         (remhash package *slide-show-map*)))
   show)
 
-(define-action next (trial-alloy:ui-actions))
-(define-action prev (trial-alloy:ui-actions))
-(define-action reload (trial-alloy:ui-actions))
-(define-action exit (trial-alloy:ui-actions))
-
 (defclass slide-show (main)
   ((name :initform NIL :accessor name)
    (scene :initform NIL)
@@ -114,6 +109,8 @@
       (setf (slide pos show) null))))
 
 (defun start-slideshow (path &key (index 0) (muffle-logging NIL))
+  (let ((*package* #.*package*))
+    (load-keymap :reset T))
   (if muffle-logging
       (let ((level (v:repl-level)))
         (setf (v:repl-level) :error)
@@ -127,17 +124,3 @@
     (if path
         (start-slideshow path :muffle-logging T)
         (error "Please pass a path to a slide show directory."))))
-
-(define-handler (slide-show next) ()
-  (if (at-end-p slide-show)
-      (quit *context*)
-      (next-slide slide-show)))
-
-(define-handler (slide-show prev) ()
-  (prev-slide slide-show))
-
-(define-handler (slide-show reload) ()
-  (change-scene slide-show (current-slide slide-show)))
-
-(define-handler (slide-show exit) ()
-  (quit *context*))
