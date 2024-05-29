@@ -53,11 +53,9 @@
 
 (defpackage #:beamer-user
   (:nicknames #:org.shirakumo.beamer.user)
-  (:import-from #:cl #:in-package #:use-package))
-
-(dolist (name '(#:define-slide #:enter-instance #:p #:h #:c #:items #:editor #:image #:on-show #:note #:show-time))
-  (let ((symbol (find-symbol (string name) '#:org.shirakumo.beamer)))
-    (import symbol '#:org.shirakumo.beamer.user)))
+  (:import-from #:cl #:in-package #:use-package)
+  (:import-from #:beamer #:define-slide #:enter-instance #:p #:h #:c #:items #:editor #:image #:on-show #:note #:show-time)
+  (:use #:cl+trial))
 
 (do-symbols (symbol '#:org.shirakumo.beamer.user)
   (export symbol '#:org.shirakumo.beamer.user))

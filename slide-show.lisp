@@ -34,7 +34,7 @@
 (defmethod initialize-instance ((show slide-show) &key slides source)
   (call-next-method)
   (let* ((name (pathname-name source))
-         (*package* (ensure-package name)))
+         (*package* (find-package '#:org.shirakumo.beamer.user)))
     (setf (name show) (intern (pathname-name (source show))))
     (setf (current-show) show)
     (when source

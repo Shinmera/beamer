@@ -41,7 +41,8 @@
   (multiple-value-bind (base regions) (determine-regions text :language language :theme theme)
     (apply #'enter-instance 'code :text text :color base :color-regions regions initargs)))
 
-(defclass items (alloy:vertical-linear-layout) ())
+(defclass items (alloy:vertical-linear-layout)
+  ((alloy:cell-margins :initform (alloy:margins 2 2 2 10))))
 
 (defmethod initialize-instance :after ((items items) &key entries)
   (dolist (entry entries)

@@ -2,6 +2,26 @@
 
 (define-global +app-system+ "weiss")
 
+(defun read-until (end input &optional (key #'identity))
+  (etypecase end
+    (null)
+    ((eql T)
+     (loop for line = (read-line input NIL)
+           while line
+           do (funcall key line)))
+    (integer
+     (loop repeat (1- end)
+           for line = (read-line input NIL)
+           while line
+           do (funcall key line)))
+    (string
+     (loop for line = (read-line input NIL)
+           while line
+           do (funcall key line)
+              (when (string= line end)
+                (return)))))
+  input)
+
 (defun join-lines (vec &key (indent 0) (out NIL))
   (etypecase out
     (null
@@ -13,20 +33,19 @@
        (loop for i from 1 below (length vec)
              do (format out "~%~v{ ~}~a" indent 0 (aref vec i)))))))
 
-(defun split-lines (in &key (trim 0) count)
+(defun split-lines (in &key (trim 0) (end T))
   (etypecase in
     (string
      (with-input-from-string (in in)
-       (split-lines in :trim trim :count count)))
+       (split-lines in :trim trim :end end)))
     (T
      (let ((lines (make-array 0 :adjustable T :fill-pointer T)))
-       (loop repeat (or count most-positive-fixnum)
-             for line = (read-line in NIL)
-             while line
-             do (vector-push-extend (if (<= trim (length line))
+       (flet ((thunk (line)
+                (vector-push-extend (if (<= trim (length line))
                                         (subseq line trim)
                                         "")
-                                    lines))
+                                    lines)))
+         (read-until end in #'thunk))
        lines))))
 
 (defun hex->color (hex)
@@ -42,10 +61,6 @@
                 collect key collect val
                 finally (setf body list))
           body))
-
-(defun ensure-package (name)
-  (or (find-package name)
-      (make-package name :use '(#:org.shirakumo.beamer.user))))
 
 (defun format-clock (clock)
   (let ((clock (round clock)))
