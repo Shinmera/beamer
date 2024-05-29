@@ -35,12 +35,17 @@
     (format stream "~a/~a" (name (slide-show slide)) (name slide))))
 
 (defun enter-instance (instance/class &rest initargs)
-  (alloy:enter (etypecase instance/class
-                 ((or class symbol) (apply #'make-instance instance/class initargs))
-                 (standard-object instance/class))
-               (let ((ui (ui (or *slide* (error "Not in a slide!")))))
-                 (or (trial-alloy:find-panel 'slide-panel ui)
-                     (trial:show (make-instance 'slide-panel) :ui ui)))))
+  (let ((slide (or *slide* (error "Not in a slide!")))
+        (instance (etypecase instance/class
+                    ((or class symbol) (apply #'make-instance instance/class initargs))
+                    (standard-object instance/class))))
+    (etypecase instance
+      (trial:entity
+       (enter instance slide))
+      (alloy:layout-element
+       (alloy:enter instance
+                    (or (trial-alloy:find-panel 'slide-panel (ui slide))
+                        (trial:show (make-instance 'slide-panel) :ui (ui slide))))))))
 
 (defmethod setup-scene ((show slide-show) (slide slide))
   (let ((*package* (find-package '#:org.shirakumo.beamer.user))

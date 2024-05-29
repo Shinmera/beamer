@@ -12,31 +12,35 @@
 (define-pool slide)
 
 (define-asset (slide cube) mesh
-    (make-cube 100))
+    (make-cube-mesh 100))
 
-(define-shader-subject cube (vertex-entity
-                             textured-entity
-                             colored-entity
-                             transformed-entity)
+(define-shader-entity cube (vertex-entity
+                            textured-entity
+                            colored-entity
+                            transformed-entity
+                            listener)
   ())
+
+(defmethod shared-initialize :after ((cube cube) slots &key &allow-other-keys))
 
 (define-handler (cube tick) (dt)
   (incf (vx (rotation cube)) (* dt 0.1))
   (incf (vy (rotation cube)) dt))
 
 (define-slide editor
-  (p "Lisp Source:" :size 30 :margin (vec 20 0 0 0))
+  (p "Lisp Source:")
   ;; EDITOR-START
-  (define-shader-subject cube (vertex-entity
-                               ;;textured-entity
-                               ;;colored-entity
-                               slide-subject)
+  (define-shader-entity cube (vertex-entity
+                              ;;textured-entity
+                              ;;colored-entity
+                              transformed-entity
+                              listener)
     ())
   
   (enter-instance 'cube
                   :location (vec 600 200 0)
                   :vertex-array (asset 'slide 'cube)
-                  :texture (asset 'trial 'cat)
+                  :texture (asset 'trial:trial 'trial::cat)
                   :color (vec 0.2 0.2 0.8))
   ;; EDITOR-END
   
@@ -44,4 +48,4 @@
                       :end   "  ;; EDITOR-END"
                       :trim 2 :language :lisp)
   (p "Fragment Shader:" :size 30)
-  (c (getf (effective-shaders 'cube) :fragment-shader) :size 22 :language :glsl))
+  (c (second (assoc :fragment-shader (shader-source (find-class 'cube)))) :size 22 :language :glsl))

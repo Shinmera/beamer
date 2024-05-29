@@ -1,21 +1,16 @@
 (in-package #:org.shirakumo.beamer)
 
-(defclass editor (alloy:input-box)
-  ((file :initarg :file :accessor file)
-   (lines :initform NIL :accessor lines)
-   (start :initarg :start :accessor start)
-   (end :initarg :end :accessor end)
-   (trim :initarg :trim :accessor trim)
-   (language :initarg :language :accessor language)
-   (theme :initarg :theme :accessor theme)
+(defclass editor (alloy:direct-value-component alloy:input-box)
+  ((alloy:value :initform "")
+   (file :initarg :file :accessor file)
+   (start :initarg :start :initform NIL :accessor start)
+   (end :initarg :end :initform NIL :accessor end)
+   (trim :initarg :trim :initform NIL :accessor trim)
+   (language :initarg :language :initform *default-language* :accessor language)
+   (theme :initarg :theme :initform *default-theme* :accessor theme)
    (color :initform colors:white :accessor color)
-   (markup :initform () :accessor markup))
-  (:default-initargs :size 24
-                     :start NIL
-                     :end NIL
-                     :trim 0
-                     :language *default-language*
-                     :theme *default-theme*))
+   (markup :initform () :accessor markup)
+   (size :initarg :size :initform 24 :accessor size)))
 
 (defmethod initialize-instance :after ((editor editor) &key file)
   (when file (load-text editor)))
@@ -24,10 +19,10 @@
   ((:label simple:text)
    (alloy:margins) alloy:text
    :wrap NIL
-   :pattern (color editor)
+   :pattern (color alloy:renderable)
    :font *code-font*
-   :size (alloy:px 24)
-   :markup (markup editor)
+   :size (alloy:px (size alloy:renderable))
+   :markup (markup alloy:renderable)
    :valign :top)
   ((:cursor simple:cursor)
    (find-shape :label alloy:renderable)
@@ -50,8 +45,8 @@
              (alloy:pos (alloy:cursor alloy:renderable))))
   (:label
    :text alloy:text
-   :pattern (color editor)
-   :markup (markup editor)))
+   :pattern (color alloy:renderable)
+   :markup (markup alloy:renderable)))
 
 (defmethod (setf file) :after (file (editor editor))
   (load-text editor))
@@ -69,13 +64,13 @@
                  (null T)
                  (integer (- (1+ (end editor)) (or (start editor) 0)))
                  (string (end editor)))))
-      (setf (text editor) (join-lines (split-lines s :trim (trim editor) :end end))))))
+      (setf (alloy:value editor) (join-lines (split-lines s :trim (trim editor) :end end))))))
 
 (defmethod save-text ((editor editor))
   (let ((full (with-output-to-string (o)
                 (with-open-file (s (file editor))
                   (read-until (start editor) s (lambda (line) (write-line line o)))
-                  (join-lines (split-lines (text editor)) :out o :indent (trim editor))
+                  (join-lines (split-lines (alloy:value editor)) :out o :indent (trim editor))
                   (read-until (etypecase (end editor)
                                 (null T)
                                 (integer (- (1+ (end editor)) (or (start editor) 0)))
@@ -85,7 +80,7 @@
     (with-open-file (s (file editor) :direction :output :if-exists :supersede)
       (write-string full s))))
 
-(defmethod (setf text) :after (text (editor editor))
+(defmethod (setf alloy:value) :after (text (editor editor))
   (multiple-value-bind (base regions) (determine-regions text :language (language editor) :theme (theme editor))
     (setf (color editor) base)
     (setf (markup editor) regions)))

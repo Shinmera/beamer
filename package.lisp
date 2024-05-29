@@ -1,7 +1,7 @@
 (defpackage #:beamer
   (:nicknames #:org.shirakumo.beamer)
-  (:shadow #:language)
   (:use #:cl+trial)
+  (:shadow #:language #:image)
   (:local-nicknames
    (#:v #:org.shirakumo.verbose)
    (#:alloy #:org.shirakumo.alloy)
@@ -54,7 +54,7 @@
 (defpackage #:beamer-user
   (:nicknames #:org.shirakumo.beamer.user)
   (:import-from #:cl #:in-package #:use-package)
-  (:import-from #:beamer #:define-slide #:enter-instance #:p #:h #:c #:items #:editor #:image #:on-show #:note #:show-time)
+  (:shadowing-import-from #:beamer #:define-slide #:enter-instance #:p #:h #:c #:items #:editor #:image #:on-show #:note #:show-time)
   (:use #:cl+trial))
 
 (do-symbols (symbol '#:org.shirakumo.beamer.user)
