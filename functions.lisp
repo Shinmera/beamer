@@ -1,10 +1,11 @@
 (in-package #:org.shirakumo.beamer)
 
-(defvar *header-font* "Concourse C6 Regular")
-(defvar *body-font* "Concourse T3 Regular")
-(defvar *code-font* "Triplicate T4 Code Regular")
+(defparameter *header-font* "Concourse C6")
+(defparameter *body-font* "Concourse T3")
+(defparameter *code-font* "Triplicate T4")
 
-(defclass slide-text (alloy:label*) ())
+(defclass slide-text (alloy:label*)
+  ((size :initarg :size :initform 24 :accessor size)))
 
 (presentations:define-realization (alloy:ui slide-text)
   ((:label simple:text)
@@ -12,22 +13,30 @@
    :wrap T
    :pattern colors:white
    :font *body-font*
-   :size (alloy:px 48)))
-
-(defclass header (slide-text) ())
+   :size (alloy:px (size alloy:renderable))))
 
 (presentations:define-update (alloy:ui slide-text)
   (:label
-   :font *header-font*
-   :size (alloy:px 72)))
+   :pattern colors:white))
+
+(defclass header (slide-text)
+  ((size :initform 48)))
+
+(presentations:define-update (alloy:ui header)
+  (:label
+   :font (simple:request-font alloy:renderer *header-font*)))
 
 (defclass paragraph (slide-text) ())
 
-(defclass code (slide-text highlighted-text) ())
+(defclass code (slide-text)
+  ((color :initarg :color :initform colors:white :accessor color)
+   (markup :initarg :markup :initform () :accessor markup)))
 
-(presentations:define-update (alloy:ui slide-text)
+(presentations:define-update (alloy:ui code)
   (:label
-   :font *code-font*))
+   :pattern (color alloy:renderable)
+   :markup (markup alloy:renderable)
+   :font (simple:request-font alloy:renderer *code-font*)))
 
 (defun h (text &rest initargs)
   (apply #'enter-instance 'header :value (princ-to-string text) initargs))
@@ -39,10 +48,10 @@
   (remf initargs :language)
   (remf initargs :theme)
   (multiple-value-bind (base regions) (determine-regions text :language language :theme theme)
-    (apply #'enter-instance 'code :text text :color base :color-regions regions initargs)))
+    (apply #'enter-instance 'code :value text :color base :markup regions initargs)))
 
 (defclass items (alloy:vertical-linear-layout)
-  ((alloy:cell-margins :initform (alloy:margins 2 2 2 10))))
+  ((alloy:cell-margins :initform (alloy:margins 50 2 2 2))))
 
 (defmethod initialize-instance :after ((items items) &key entries)
   (dolist (entry entries)

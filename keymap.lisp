@@ -1,9 +1,9 @@
 (trigger next
-         (key :one-of (:page-down))
+         (key :one-of (:page-down :right))
          (button :one-of (:r1)))
 
 (trigger prev
-         (key :one-of (:page-up))
+         (key :one-of (:page-up :left))
          (button :one-of (:l1)))
 
 (trigger reload

@@ -20,16 +20,14 @@
 (define-action exit (trial-alloy:ui-actions))
 
 (defclass slide-show (main)
-  ((scene :initform NIL)
+  ((name :initform NIL :accessor name)
+   (scene :initform NIL)
    (clock :initform 0.0 :accessor clock)
    (source :initarg :source :accessor source)
    (slides :initform (make-array 0 :adjustable T :fill-pointer T) :accessor slides)
-   (index :initarg :index :accessor index)
-   (max-time :initarg :max-time :accessor max-time))
-  (:default-initargs
-   :index 0
-   :max-time NIL
-   :clear-color (vec 20/255 25/255 28/255 0)))
+   (index :initarg :index :initform 0 :accessor index)
+   (max-time :initarg :max-time :initform NIL :accessor max-time)
+   (clear-color :initform (vec 20/255 25/255 28/255 0))))
 
 (defmethod initialize-instance ((show slide-show) &key slides source)
   (call-next-method)
@@ -49,7 +47,6 @@
 
 (defmethod finalize :before ((show slide-show))
   (remhash (find-package (name show)) *slide-show-map*)
-  (delete-package (name show))
   (map NIL #'finalize (slides show)))
 
 (defmethod setup-scene ((show slide-show) scene))
@@ -116,7 +113,7 @@
     (when pos
       (setf (slide pos show) null))))
 
-(defun start-slideshow (path &key (index 0) (muffle-logging T))
+(defun start-slideshow (path &key (index 0) (muffle-logging NIL))
   (if muffle-logging
       (let ((level (v:repl-level)))
         (setf (v:repl-level) :error)
@@ -128,19 +125,19 @@
 (defun toplevel ()
   (let ((path (first (uiop:command-line-arguments))))
     (if path
-        (start-slideshow path)
+        (start-slideshow path :muffle-logging T)
         (error "Please pass a path to a slide show directory."))))
 
-(define-handler (slide-show next) (ev)
+(define-handler (slide-show next) ()
   (if (at-end-p slide-show)
       (quit *context*)
       (next-slide slide-show)))
 
-(define-handler (slide-show prev) (ev)
+(define-handler (slide-show prev) ()
   (prev-slide slide-show))
 
-(define-handler (slide-show reload) (ev)
+(define-handler (slide-show reload) ()
   (change-scene slide-show (current-slide slide-show)))
 
-(define-handler (slide-show exit) (ev)
+(define-handler (slide-show exit) ()
   (quit *context*))
