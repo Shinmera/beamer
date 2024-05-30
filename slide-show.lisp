@@ -34,7 +34,8 @@
       (cl:load source))
     (dolist (slide slides)
       (vector-push-extend slide (slides show)))
-    (setf (scene show) (current-slide show))))
+    (setf (scene show) (or (current-slide show)
+                           (error "There are no slides defined.")))))
 
 (defmethod print-object ((show slide-show) stream)
   (print-unreadable-object (show stream :type T)
@@ -64,7 +65,8 @@
   (change-scene show (aref (slides show) value)))
 
 (defmethod current-slide ((show slide-show))
-  (aref (slides show) (index show)))
+  (when (< (index show) (length (slides show)))
+    (aref (slides show) (index show))))
 
 (defmethod advance-slide ((show slide-show) by)
   (setf (index show) (max 0 (min (+ (index show) by) (1- (length (slides show))))))
@@ -109,8 +111,7 @@
       (setf (slide pos show) null))))
 
 (defun start-slideshow (path &key (index 0) (muffle-logging NIL))
-  (let ((*package* #.*package*))
-    (load-keymap :reset T))
+  (load-keymap :package #.*package*)
   (if muffle-logging
       (let ((level (v:repl-level)))
         (setf (v:repl-level) :error)
@@ -120,7 +121,16 @@
       (launch 'slide-show :source path :index index)))
 
 (defun toplevel ()
-  (let ((path (first (uiop:command-line-arguments))))
-    (if path
-        (start-slideshow path :muffle-logging T)
-        (error "Please pass a path to a slide show directory."))))
+  #+sbcl (sb-ext:disable-debugger)
+  (handler-case
+      (let ((path (first (uiop:command-line-arguments))))
+        (if path
+            (start-slideshow path :muffle-logging T)
+            (error "Please pass a path to a slide show file.")))
+    (error (e)
+      (format *error-output* "~&~a~%" e)
+      (uiop:quit 1))))
+
+(deploy:define-hook (:deploy beamer) ()
+  (load-mapping (merge-pathnames "keymap.lisp" (data-root)) :package #.*package*)
+  (push :deploy-console *features*))
