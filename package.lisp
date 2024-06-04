@@ -1,7 +1,7 @@
 (defpackage #:beamer
   (:nicknames #:org.shirakumo.beamer)
   (:use #:cl+trial)
-  (:shadow #:language #:image)
+  (:shadow #:language #:image #:p #:h #:c)
   (:local-nicknames
    (#:v #:org.shirakumo.verbose)
    (#:alloy #:org.shirakumo.alloy)

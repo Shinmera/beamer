@@ -28,7 +28,7 @@
     (unless (node :camera slide)
       (enter (make-instance 'sidescroll-camera :name :camera) slide))
     (unless (nodes slide)
-      (enter (make-instance 'render-pass) slide))))
+      (enter (make-instance 'render-pass :clear-color (vec 20/255 25/255 28/255 0)) slide))))
 
 (defmethod print-object ((slide slide) stream)
   (print-unreadable-object (slide stream :type T)

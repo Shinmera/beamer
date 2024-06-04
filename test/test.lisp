@@ -39,8 +39,8 @@
   
   (enter-instance 'cube
                   :location (vec 600 200 0)
-                  :vertex-array (asset 'slide 'cube)
-                  :texture (asset 'trial:trial 'trial::cat)
+                  :vertex-array (// 'slide 'cube)
+                  :texture (// 'trial:trial 'trial::cat)
                   :color (vec 0.2 0.2 0.8))
   ;; EDITOR-END
   

@@ -21,8 +21,7 @@
    (source :initarg :source :accessor source)
    (slides :initform (make-array 0 :adjustable T :fill-pointer T) :accessor slides)
    (index :initarg :index :initform 0 :accessor index)
-   (max-time :initarg :max-time :initform NIL :accessor max-time)
-   (clear-color :initform (vec 20/255 25/255 28/255 0))))
+   (max-time :initarg :max-time :initform NIL :accessor max-time)))
 
 (defmethod initialize-instance ((show slide-show) &key slides source)
   (call-next-method)
@@ -56,10 +55,6 @@
           (format-clock (clock show))
           (when (max-time show) (format-clock (- (max-time show) (clock show))))
           (format-clock (clock (scene show)))))
-
-(defmethod change-scene :around ((show slide-show) scene &key old)
-  (with-context ((context show))
-    (call-next-method)))
 
 (defmethod (setf index) :before (value (show slide-show))
   (change-scene show (aref (slides show) value)))
