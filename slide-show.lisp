@@ -120,7 +120,7 @@
   (handler-case
       (let ((path (first (uiop:command-line-arguments))))
         (if path
-            (start-slideshow path :muffle-logging T)
+            (start-slideshow (merge-pathnames path (uiop:getcwd)) :muffle-logging T)
             (error "Please pass a path to a slide show file.")))
     (error (e)
       (format *error-output* "~&~a~%" e)
