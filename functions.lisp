@@ -70,7 +70,7 @@
    :sizing :contain))
 
 (defun image (file &rest initargs)
-  (apply #'enter-instance 'image :texture (make-instance 'image :input (slide-file file))
+  (apply #'enter-instance 'image :value (slide-file file)
          initargs))
 
 (defmacro on-show (&body body)
