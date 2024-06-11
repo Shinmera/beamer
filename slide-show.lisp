@@ -1,18 +1,6 @@
 (in-package #:org.shirakumo.beamer)
 
-(defvar *slide-show-map* (make-hash-table :test 'eq))
 (defvar *slide*)
-
-(defun current-show (&optional (package *package*))
-  (or (gethash (find-package package) *slide-show-map*)
-      (error "~a is not a slide show." package)))
-
-(defun (setf current-show) (show &optional (package *package*))
-  (let ((package (find-package package)))
-    (if show
-        (setf (gethash package *slide-show-map*) show)
-        (remhash package *slide-show-map*)))
-  show)
 
 (defclass slide-show (main)
   ((name :initform NIL :accessor name)
@@ -28,7 +16,6 @@
   (let* ((name (pathname-name source))
          (*package* (find-package '#:org.shirakumo.beamer.user)))
     (setf (name show) (intern (pathname-name (source show))))
-    (setf (current-show) show)
     (when source
       (cl:load source))
     (dolist (slide slides)
@@ -41,7 +28,6 @@
     (format stream "~a" (name show))))
 
 (defmethod finalize :before ((show slide-show))
-  (remhash (find-package (name show)) *slide-show-map*)
   (map NIL #'finalize (slides show)))
 
 (defmethod setup-scene ((show slide-show) scene))
@@ -84,34 +70,38 @@
 (defmethod prev-slide ((show slide-show))
   (advance-slide show -1))
 
-(defmethod slide ((index integer) &optional (show (current-show)))
-  (aref (slides show) index))
+(defmethod slide ((index integer))
+  (aref (slides +main+) index))
 
-(defmethod slide ((name symbol) &optional (show (current-show)))
-  (find name (slides show) :key #'name))
+(defmethod slide ((name symbol))
+  (find name (slides +main+) :key #'name))
 
-(defmethod (setf slide) (slide (index integer) &optional (show (current-show)))
-  (finalize (shiftf (aref (slides show) index) slide))
-  (when (= (index show) index)
-    (change-scene show slide))
-  slide)
+(defmethod (setf slide) (slide (index integer))
+  (when +main+
+    (finalize (shiftf (aref (slides +main+) index) slide))
+    (when (= (index +main+) index)
+      (change-scene +main+ slide))
+    slide))
 
-(defmethod (setf slide) (slide (name symbol) &optional (show (current-show)))
-  (let ((pos (position name (slides show) :key #'name)))
-    (if pos
-        (setf (slide pos show) slide)
-        (vector-push-extend slide (slides show)))))
+(defmethod (setf slide) (slide (name symbol))
+  (when +main+
+    (let ((pos (position name (slides +main+) :key #'name)))
+      (if pos
+          (setf (slide pos +main+) slide)
+          (vector-push-extend slide (slides +main+))))))
 
-(defmethod (setf slide) ((null null) (index integer) &optional (show (current-show)))
-  (finalize (array-utils:vector-pop-position (slides show) index))
-  (when (= (index show) index)
-    (setf (index show) (max 0 (1- (index show)))))
+(defmethod (setf slide) ((null null) (index integer))
+  (when +main+
+    (finalize (array-utils:vector-pop-position (slides +main+) index))
+    (when (= (index +main+) index)
+      (setf (index +main+) (max 0 (1- (index +main+))))))
   null)
 
-(defmethod (setf slide) ((null null) (name symbol) &optional (show (current-show)))
-  (let ((pos (position name (slides show) :key #'name)))
-    (when pos
-      (setf (slide pos show) null))))
+(defmethod (setf slide) ((null null) (name symbol))
+  (when +main+
+    (let ((pos (position name (slides +main+) :key #'name)))
+      (when pos
+        (setf (slide pos +main+) null)))))
 
 (defun start-slideshow (path &key (index 0) (muffle-logging NIL))
   (load-keymap :package #.*package*)

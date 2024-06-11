@@ -5,7 +5,7 @@
 (defparameter *code-font* "Triplicate T4")
 
 (defclass slide-text (alloy:label*)
-  ((size :initarg :size :initform 24 :accessor size)))
+  ((size :initarg :size :initform 20 :accessor size)))
 
 (presentations:define-realization (alloy:ui slide-text)
   ((:label simple:text)
@@ -81,4 +81,5 @@
         (on-show-functions *slide*)))
 
 (defun show-time (minutes)
-  (setf (max-time (current-show)) (* 60 minutes)))
+  (when +main+
+    (setf (max-time +main+) (* 60 minutes))))

@@ -10,7 +10,7 @@
    (theme :initarg :theme :initform *default-theme* :accessor theme)
    (color :initform colors:white :accessor color)
    (markup :initform () :accessor markup)
-   (size :initarg :size :initform 24 :accessor size)))
+   (size :initarg :size :initform 18 :accessor size)))
 
 (defmethod initialize-instance :after ((editor editor) &key file)
   (when file (load-text editor)))

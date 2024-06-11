@@ -34,7 +34,6 @@
   (:export
    #:*slide*
    #:load-slide-show
-   #:current-show
    #:slide-show
    #:source
    #:slides

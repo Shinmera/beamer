@@ -16,7 +16,7 @@
 (defclass slide (pipelined-scene)
   ((name :initarg :name :reader name)
    (clock :initform 0.0 :accessor clock)
-   (slide-show :initarg :slide-show :reader slide-show)
+   (slide-show :initarg :slide-show :initform +main+ :reader slide-show)
    (ui :initform (make-instance 'trial-alloy:base-ui) :accessor ui)
    (constructor :initarg :constructor :accessor constructor)
    (on-show-functions :initarg :on-show :initform () :accessor on-show-functions)))
@@ -24,7 +24,8 @@
 (defmethod initialize-instance :after ((slide slide) &key)
   (let ((*package* (find-package '#:org.shirakumo.beamer.user))
         (*slide* slide))
-    (funcall (constructor slide))
+    (when (slide-show slide)
+      (funcall (constructor slide)))
     (unless (node :camera slide)
       (enter (make-instance 'sidescroll-camera :name :camera) slide))
     (unless (nodes slide)
@@ -51,7 +52,7 @@
   (let ((*package* (find-package '#:org.shirakumo.beamer.user))
         (*slide* slide))
     (mapc #'funcall (on-show-functions slide)))
-  (let ((output (car (nodes slide)))
+  (let ((output (or (car (nodes slide)) (aref (passes slide) (1- (length (passes slide))))))
         (ui (ui slide))
         (combine (make-instance 'blend-pass :name 'blend-pass)))
     (connect (port output 'color) (port combine 'a-pass) slide)
@@ -69,7 +70,6 @@
       `(flet ((,constructor ()
                 ,@body))
          (setf (slide ',name) (make-instance 'slide :name ',name
-                                                    :slide-show (current-show)
                                                     :constructor #',constructor
                                                     ,@opts))))))
 

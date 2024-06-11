@@ -38,7 +38,7 @@
     ())
   
   (enter-instance 'cube
-                  :location (vec 600 200 0)
+                  :location (vec 500 100 0)
                   :vertex-array (// 'slide 'cube)
                   :texture (// 'trial:trial 'trial::cat)
                   :color (vec 0.2 0.2 0.8))
@@ -48,4 +48,4 @@
                       :end   "  ;; EDITOR-END"
                       :trim 2 :language :lisp)
   (p "Fragment Shader:" :size 30)
-  (c (second (assoc :fragment-shader (shader-source (find-class 'cube)))) :size 22 :language :glsl))
+  (c (second (assoc :fragment-shader (shader-source (find-class 'cube)))) :size 18 :language :glsl))
