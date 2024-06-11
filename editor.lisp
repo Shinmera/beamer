@@ -25,12 +25,12 @@
    :markup (markup alloy:renderable)
    :valign :top)
   ((:cursor simple:cursor)
-   (find-shape :label alloy:renderable)
+   (presentations:find-shape :label alloy:renderable)
    0
    :composite-mode :source-over
    :pattern colors:black)
   ((:selection simple:selection)
-   (find-shape :label alloy:renderable)
+   (presentations:find-shape :label alloy:renderable)
    0 0))
 
 (presentations:define-update (alloy:ui editor)
@@ -85,8 +85,8 @@
     (setf (color editor) base)
     (setf (markup editor) regions)))
 
-(defmethod alloy:handle ((event alloy:key-down) (component editor))
-  (if (find :control (modifiers event))
+(defmethod alloy:handle ((event alloy:key-down) (editor editor))
+  (if (find :control (alloy:modifiers event))
       (case (key event)
         (:s (save-text editor))
         (:l (load-text editor))

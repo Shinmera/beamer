@@ -24,8 +24,7 @@
 (defmethod shared-initialize :after ((cube cube) slots &key &allow-other-keys))
 
 (define-handler (cube tick) (dt)
-  (incf (vx (rotation cube)) (* dt 0.1))
-  (incf (vy (rotation cube)) dt))
+  (nq* (orientation cube) (qfrom-angle +vx+ dt)))
 
 (define-slide editor
   (p "Lisp Source:")
