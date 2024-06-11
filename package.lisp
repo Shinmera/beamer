@@ -55,6 +55,15 @@
   (:nicknames #:org.shirakumo.beamer.user)
   (:import-from #:cl #:in-package #:use-package)
   (:shadowing-import-from #:beamer #:define-slide #:enter-instance #:p #:h #:c #:items #:editor #:image #:on-show #:note #:show-time)
+  (:local-nicknames
+   (#:alloy #:org.shirakumo.alloy)
+   (#:trial-alloy #:org.shirakumo.fraf.trial.alloy)
+   (#:simple #:org.shirakumo.alloy.renderers.simple)
+   (#:presentations #:org.shirakumo.alloy.renderers.simple.presentations)
+   (#:opengl #:org.shirakumo.alloy.renderers.opengl)
+   (#:colored #:org.shirakumo.alloy.colored)
+   (#:colors #:org.shirakumo.alloy.colored.colors)
+   (#:animation #:org.shirakumo.alloy.animation))
   (:use #:cl+trial))
 
 (do-symbols (symbol '#:org.shirakumo.beamer.user)

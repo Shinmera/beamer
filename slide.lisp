@@ -76,15 +76,18 @@
 (defun slide-file (path &optional (slide *slide*))
   (merge-pathnames path (make-pathname :name NIL :type NIL :defaults (source (slide-show slide)))))
 
+(define-action start (trial-alloy:ui-actions))
+(define-action end (trial-alloy:ui-actions))
 (define-action next (trial-alloy:ui-actions))
 (define-action prev (trial-alloy:ui-actions))
 (define-action reload (trial-alloy:ui-actions))
 (define-action exit (trial-alloy:ui-actions))
 
+(define-handler (slide start) ()
+  (first-slide +main+))
+
 (define-handler (slide next) ()
-  (if (at-end-p +main+)
-      (quit *context*)
-      (next-slide +main+)))
+  (last-slide +main+))
 
 (define-handler (slide prev) ()
   (prev-slide +main+))

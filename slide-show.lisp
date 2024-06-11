@@ -70,6 +70,14 @@
 (defmethod at-end-p ((show slide-show))
   (<= (length (slides show)) (1+ (index show))))
 
+(defmethod first-slide ((show slide-show))
+  (setf (index show) 0)
+  (current-slide show))
+
+(defmethod last-slide ((show slide-show))
+  (setf (index show) (1- (length (slides show))))
+  (current-slide show))
+
 (defmethod next-slide ((show slide-show))
   (advance-slide show 1))
 
