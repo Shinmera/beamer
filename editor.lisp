@@ -5,7 +5,7 @@
    (file :initarg :file :accessor file)
    (start :initarg :start :initform NIL :accessor start)
    (end :initarg :end :initform NIL :accessor end)
-   (trim :initarg :trim :initform NIL :accessor trim)
+   (trim :initarg :trim :initform 0 :accessor trim)
    (language :initarg :language :initform *default-language* :accessor language)
    (theme :initarg :theme :initform *default-theme* :accessor theme)
    (color :initform colors:white :accessor color)

@@ -7,11 +7,11 @@
          (button :one-of (:start)))
 
 (trigger next
-         (key :one-of (:page-down :right))
+         (key :one-of (:page-down :down :right))
          (button :one-of (:r1)))
 
 (trigger prev
-         (key :one-of (:page-up :left))
+         (key :one-of (:page-up :up :left))
          (button :one-of (:l1)))
 
 (trigger reload

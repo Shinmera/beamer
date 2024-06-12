@@ -13,15 +13,18 @@
 
 (defmethod initialize-instance ((show slide-show) &key slides source)
   (call-next-method)
-  (let* ((name (pathname-name source))
-         (*package* (find-package '#:org.shirakumo.beamer.user)))
+  (let* ((*package* (find-package '#:org.shirakumo.beamer.user)))
     (setf (name show) (intern (pathname-name (source show))))
     (when source
       (cl:load source))
     (dolist (slide slides)
       (vector-push-extend slide (slides show)))
     (setf (scene show) (or (current-slide show)
-                           (error "There are no slides defined.")))))
+                           (error "There are no slides defined.")))
+    (format T "~&Slide sequence:~%")
+    (loop for slide across (slides show)
+          for i from 0
+          do (format T "~& ~2d: ~a~%" i (name slide)))))
 
 (defmethod print-object ((show slide-show) stream)
   (print-unreadable-object (show stream :type T)
@@ -35,15 +38,17 @@
 (defmethod change-scene :before ((show slide-show) scene &key old)
   (declare (ignore old))
   (incf (clock show) (clock (scene show)))
-  (format T "~&~% ~2d/~2d (~3d%)   ~a~@[ -~a~] (+~a)~%"
+  (format T "~&~% ~2d/~2d (~3d%)   ~a~@[ -~a~] (+~a) ~a~%"
           (1+ (index show)) (length (slides show))
           (round (/ (1+ (index show)) (length (slides show)) 0.01))
           (format-clock (clock show))
           (when (max-time show) (format-clock (- (max-time show) (clock show))))
-          (format-clock (clock (scene show)))))
+          (format-clock (clock (scene show)))
+          (name (scene show))))
 
 (defmethod (setf index) :before (value (show slide-show))
-  (change-scene show (aref (slides show) value)))
+  (unless (= value (index show))
+    (change-scene show (aref (slides show) value))))
 
 (defmethod current-slide ((show slide-show))
   (when (< (index show) (length (slides show)))

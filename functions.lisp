@@ -5,12 +5,14 @@
 (defparameter *code-font* "Triplicate T4")
 
 (defclass slide-text (alloy:label*)
-  ((size :initarg :size :initform 20 :accessor size)))
+  ((size :initarg :size :initform 30 :accessor size)
+   (halign :initarg :halign :initform :left :accessor halign)))
 
 (presentations:define-realization (alloy:ui slide-text)
   ((:label simple:text)
-   (alloy:margins) alloy:text
+   (alloy:margins 0 10) alloy:text
    :wrap T
+   :halign (halign alloy:renderable)
    :pattern colors:white
    :font *body-font*
    :size (alloy:px (size alloy:renderable))))
@@ -69,8 +71,8 @@
    :image alloy:value
    :sizing :contain))
 
-(defun image (file &rest initargs)
-  (apply #'enter-instance 'image :value (slide-file file)
+(defun image (file size &rest initargs)
+  (apply #'enter-instance 'image :value (slide-file file) :sizing-strategy (make-instance 'alloy:fixed-size :fixed-size (alloy:size (first size) (second size)))
          initargs))
 
 (defmacro on-show (&body body)

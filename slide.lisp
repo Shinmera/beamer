@@ -87,8 +87,11 @@
 (define-handler (slide start) ()
   (first-slide +main+))
 
-(define-handler (slide next) ()
+(define-handler (slide end) ()
   (last-slide +main+))
+
+(define-handler (slide next) ()
+  (next-slide +main+))
 
 (define-handler (slide prev) ()
   (prev-slide +main+))
