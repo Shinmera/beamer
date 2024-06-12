@@ -64,11 +64,12 @@
     (enter-instance 'items :entries entries)))
 
 (defclass image (alloy:direct-value-component alloy:icon)
-  ())
+  ((padding :initarg :padding :initform (alloy:margins 10) :accessor padding)))
 
-(presentations:define-update (alloy:ui image)
-  (:icon
-   :image alloy:value
+(presentations:define-realization (alloy:ui image)
+  ((:icon simple:icon)
+   (padding alloy:renderable)
+   alloy:value
    :sizing :contain))
 
 (defun image (file size &rest initargs)

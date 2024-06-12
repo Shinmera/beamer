@@ -85,14 +85,15 @@
   (when +main+
     (finalize (shiftf (aref (slides +main+) index) slide))
     (when (= (index +main+) index)
-      (change-scene +main+ slide))
+      (with-eval-in-render-loop ()
+        (change-scene +main+ slide)))
     slide))
 
 (defmethod (setf slide) (slide (name symbol))
   (when +main+
     (let ((pos (position name (slides +main+) :key #'name)))
       (if pos
-          (setf (slide pos +main+) slide)
+          (setf (slide pos) slide)
           (vector-push-extend slide (slides +main+))))))
 
 (defmethod (setf slide) ((null null) (index integer))
@@ -106,7 +107,7 @@
   (when +main+
     (let ((pos (position name (slides +main+) :key #'name)))
       (when pos
-        (setf (slide pos +main+) null)))))
+        (setf (slide pos) null)))))
 
 (defun start-slideshow (path &key (index 0) (muffle-logging NIL))
   (load-keymap :package #.*package*)
