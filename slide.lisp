@@ -29,7 +29,7 @@
     (unless (node :camera slide)
       (enter (make-instance 'sidescroll-camera :name :camera) slide))
     (unless (nodes slide)
-      (enter (make-instance 'render-pass :clear-color (vec 20/255 25/255 28/255 0)) slide))))
+      (enter (make-instance 'render-pass) slide))))
 
 (defmethod print-object ((slide slide) stream)
   (print-unreadable-object (slide stream :type T)
@@ -56,6 +56,7 @@
     (let ((output (or (car (nodes slide)) (aref (passes slide) (1- (length (passes slide))))))
           (ui (ui slide))
           (combine (make-instance 'blend-pass :name 'blend-pass)))
+      (setf (clear-color output) (vec 20/255 25/255 28/255 0))
       (connect (port output 'color) (port combine 'a-pass) slide)
       (connect (port ui 'color) (port combine 'b-pass) slide)))
   slide)

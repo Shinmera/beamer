@@ -28,7 +28,7 @@
    (presentations:find-shape :label alloy:renderable)
    0
    :composite-mode :source-over
-   :pattern colors:black)
+   :pattern colors:white)
   ((:selection simple:selection)
    (presentations:find-shape :label alloy:renderable)
    0 0))
@@ -64,19 +64,22 @@
                  (null T)
                  (integer (- (1+ (end editor)) (or (start editor) 0)))
                  (string (end editor)))))
-      (setf (alloy:value editor) (join-lines (split-lines s :trim (trim editor) :end end))))))
+      (setf (alloy:value editor) (join-lines (split-lines s :trim (trim editor) :end end :include-end NIL))))))
 
 (defmethod save-text ((editor editor))
   (let ((full (with-output-to-string (o)
                 (with-open-file (s (file editor))
-                  (read-until (start editor) s (lambda (line) (write-line line o)))
+                  (read-until (start editor) s :key (lambda (line) (write-line line o)))
                   (join-lines (split-lines (alloy:value editor)) :out o :indent (trim editor))
                   (read-until (etypecase (end editor)
                                 (null T)
                                 (integer (- (1+ (end editor)) (or (start editor) 0)))
                                 (string (end editor)))
                               s)
-                  (read-until T s (lambda (line) (write-line line o)))))))
+                  (when (stringp (end editor))
+                    (fresh-line o)
+                    (write-line (end editor) o))
+                  (read-until T s :key (lambda (line) (write-line line o)))))))
     (with-open-file (s (file editor) :direction :output :if-exists :supersede)
       (write-string full s))))
 
@@ -87,7 +90,7 @@
 
 (defmethod alloy:handle ((event alloy:key-down) (editor editor))
   (if (find :control (alloy:modifiers event))
-      (case (key event)
+      (case (alloy:key event)
         (:s (save-text editor))
         (:l (load-text editor))
         (:c (let ((*package* (find-package '#:org.shirakumo.beamer.user)))

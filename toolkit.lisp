@@ -2,7 +2,7 @@
 
 (define-global +app-system+ "beamer")
 
-(defun read-until (end input &optional (key #'identity))
+(defun read-until (end input &key (key #'identity) (include-end T))
   (etypecase end
     (null)
     ((eql T)
@@ -17,9 +17,10 @@
     (string
      (loop for line = (read-line input NIL)
            while line
-           do (funcall key line)
-              (when (string= line end)
-                (return)))))
+           do (when (string= line end)
+                (when include-end (funcall key line))
+                (return))
+              (funcall key line))))
   input)
 
 (defun join-lines (vec &key (indent 0) (out NIL))
@@ -33,7 +34,7 @@
        (loop for i from 1 below (length vec)
              do (format out "~%~v{ ~}~a" indent 0 (aref vec i)))))))
 
-(defun split-lines (in &key (trim 0) (end T))
+(defun split-lines (in &key (trim 0) (end T) include-end)
   (etypecase in
     (string
      (with-input-from-string (in in)
@@ -45,7 +46,7 @@
                                         (subseq line trim)
                                         "")
                                     lines)))
-         (read-until end in #'thunk))
+         (read-until end in :key #'thunk :include-end include-end))
        lines))))
 
 (defun hex->color (hex)
