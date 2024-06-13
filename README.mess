@@ -1,0 +1,75 @@
+# About Beamer
+This is a slide show or "powerpoint" application built upon the ''Trial''(https://shirakumo.org/trial) game engine. Being built with a game-engine allows you to add all sorts of interactive elements to your slides, though if we're being real, I only made this for the purpose of being cheeky in my own talks about Trial.
+
+## Basic How To
+Create a lisp source file, start with ``(in-package #:beamer-user)`` and then define your slides using ``define-slide``.
+
+:: common lisp
+(define-slide hello
+  (h "Hello Everyone!")
+  (p "This is some paragraph of text that would usually be filled with Lorem Ipsum, but I'm too lazy to go generate that text right now, so I'm just typing something out here. The text will wrap properly anyway.")
+  (items
+    "You can also"
+    "Create lists")
+  (image "my-image.png" '(100 100)))
+::
+
+In order to actually run your slide show, load up ``beamer`` and use ``start-slideshow``:
+
+:: common lisp
+(beamer:start-slideshow "my-presentation.lisp")
+::
+
+You can then navigate slides with the following keys:
+
+- ``Page Up`` Previous slide
+- ``Page Down`` Next slide
+- ``Home`` First slide
+- ``End`` Last slide
+- ``Escape`` Close presentation
+- ``F11`` Toggle fullscreen
+
+Within the slide definitions you can use the following shorthand functions:
+
+- ``h`` A header
+- ``p`` A paragraph
+- ``c`` A code segment
+- ``items`` A bullet list
+- ``image`` An image
+  The path is relative to the slide file. You have to provide a size as well, which should be a list of two elements with either both being unit numbers, or one being ``*`` in which case the image will take up all space in that direction.
+- ``arrange`` A grid layout
+  You must specify at least the ``:col-sizes`` and ``:row-sizes``.
+- ``editor`` A code editor
+  The path is relative to the slide file and can be the slide file itself. You can also pass the following options:
+  - ``:start`` A character index or string to match a line for after which the text for the editor begins
+  - ``:end`` A character index or string to match a line for up to which the text is displayed in the editor
+  - ``:trim`` A number of characters to trim off the beginning of each line
+  - ``:language`` A name for a syntax highlighting scheme to use. The following are supported:
+    - ``NIL``
+    - ``:lisp``
+    - ``:glsl``
+    - ``:link``
+  - ``:theme`` A name for a highlighting theme to use. The following are supported:
+    - ``NIL``
+    - ``:monokai``
+  - ``:size`` The base font size
+  When in the editor in a slide you can use ``C-s`` to save the text, ``C-l`` to reload the text, and ``C-c`` to compile the text as lisp source.
+
+## Advanced Crap
+A slide within Beamer is simply a ``scene`` that sets up some defaults. Every shorthand function like ``h`` just creates an Alloy component and inserts it into the UI. This means that you can also create whatever other Alloy layouts you want within the slide. And because it is a Trial scene, you can also create whatever other Trial objects you want and add them into the scene:
+
+:: common lisp
+(ql:quickload :trial-assets)
+
+(define-slide trial-in-slide
+  (h "Check this out:")
+  (enter-instance 'directional-light :direction (vec 0.5 -1 0) :color (vec3 1))
+  (enter-instance 'ambient-light :color (vec3 0.5))
+  (enter-instance 'basic-animated-entity :asset (org.shirakumo.fraf.trial.assets:asset :woman))
+  (enter-instance 'target-camera :target (vec 0 2.5 0) :location (vec 0 2 4))
+  (enter-instance 'pbr-render-pass))
+::
+
+You can of course also set up Alloy components and even tie them together with Trial objects to make the slides interactive that way.
+
+Beamer can also be deployed into a standalone executable, though of course beware that you won't be able to load new ASDF systems in your presentations with the deployed version.

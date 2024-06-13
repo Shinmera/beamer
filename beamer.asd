@@ -14,7 +14,8 @@
                (:file "slide-show")
                (:file "functions")
                (:file "editor")
-               (:file "slide"))
+               (:file "slide")
+               (:file "documentation"))
   :defsystem-depends-on (:deploy)
   :depends-on (:trial-glfw
                :trial-alloy
