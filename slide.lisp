@@ -42,6 +42,7 @@
     instance))
 
 (defmethod setup-scene ((show slide-show) (slide slide))
+  (setf (active-p (action-set 'trial-alloy:ui-actions)) T)
   (when (= (length slide) 0)
     (let ((*package* (find-package '#:org.shirakumo.beamer.user))
           (*slide* slide))
