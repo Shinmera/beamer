@@ -94,7 +94,9 @@
         (:s (save-text editor))
         (:l (load-text editor))
         (:c (let ((*package* (find-package '#:org.shirakumo.beamer.user)))
-              (cl:load (file editor))))
+              (uiop:with-temporary-file (:pathname path :type "lisp")
+                (alexandria:write-string-into-file (alloy:value editor) path :if-exists :supersede)
+                (cl:load (compile-file path)))))
         (T
          (call-next-method)))
       (call-next-method)))
