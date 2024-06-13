@@ -18,7 +18,12 @@
   ((name :initarg :name :reader name)
    (clock :initform 0.0 :accessor clock)
    (slide-show :initarg :slide-show :initform +main+ :reader slide-show)
-   (ui :initform (make-instance 'trial-alloy:base-ui) :accessor ui)
+   (ui :initform (make-instance 'trial-alloy:base-ui :scales '((3840 T 3.0)
+                                                               (2800 T 2.0)
+                                                               (1920 T 1.5)
+                                                               (1280 T 1.0)
+                                                               (1000 T 0.8)
+                                                               (T T 0.5))) :accessor ui)
    (constructor :initarg :constructor :accessor constructor)
    (on-show-functions :initarg :on-show :initform () :accessor on-show-functions)))
 
