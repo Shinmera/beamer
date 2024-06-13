@@ -10,7 +10,7 @@
    (theme :initarg :theme :initform *default-theme* :accessor theme)
    (color :initform colors:white :accessor color)
    (markup :initform () :accessor markup)
-   (size :initarg :size :initform 18 :accessor size)))
+   (size :initarg :size :initform (alloy:un 18) :accessor size)))
 
 (defmethod initialize-instance :after ((editor editor) &key file)
   (when file (load-text editor)))
@@ -21,7 +21,7 @@
    :wrap NIL
    :pattern (color alloy:renderable)
    :font *code-font*
-   :size (alloy:px (size alloy:renderable))
+   :size (size alloy:renderable)
    :markup (markup alloy:renderable)
    :valign :top)
   ((:cursor simple:cursor)
