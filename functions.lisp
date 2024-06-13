@@ -72,8 +72,16 @@
    alloy:value
    :sizing :contain))
 
+(defun coerce-size (a b)
+  (alloy:size (case a
+                ((* T) (alloy:vw 1))
+                (T a))
+              (case b
+                ((* T) (alloy:vh 1))
+                (T b))))
+
 (defun image (file size &rest initargs)
-  (apply #'enter-instance 'image :value (slide-file file) :sizing-strategy (make-instance 'alloy:fixed-size :fixed-size (alloy:size (first size) (second size)))
+  (apply #'enter-instance 'image :value (slide-file file) :sizing-strategy (make-instance 'alloy:fixed-size :fixed-size (apply #'coerce-size size))
          initargs))
 
 (defmacro on-show (&body body)
