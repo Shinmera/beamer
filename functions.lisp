@@ -54,7 +54,7 @@
 
 (defclass items (alloy:grid-layout)
   ()
-  (:default-initargs :col-sizes '(60 T) :row-sizes '(60)
+  (:default-initargs :col-sizes '(60 T) :row-sizes '(70)
                      :cell-margins (alloy:margins 5)))
 
 (defclass bullet-point (alloy:layout-element alloy:renderable)
@@ -62,7 +62,7 @@
 
 (presentations:define-realization (alloy:ui bullet-point)
   ((bullet simple:ellipse)
-   (alloy:margins 30)
+   (alloy:extent (alloy:u- (alloy:pw 0.5) 10) (alloy:u- (alloy:ph 0.5) 10) 10 10)
    :pattern colors:white))
 
 (defmacro items (&body body)
@@ -70,9 +70,7 @@
     `(let ((*layout-parent* (enter-instance 'items ,@opts)))
        ,@(loop for el in entries
                collect `(enter-instance 'bullet-point)
-               collect `(let ((*layout-parent* (enter-instance 'alloy:vertical-linear-layout
-                                                               :min-size (alloy:size)
-                                                               :cell-margins (alloy:margins))))
+               collect `(let ((*layout-parent* (enter-instance 'alloy:vertical-linear-layout :cell-margins (alloy:margins))))
                           ,(if (stringp el)
                                `(p ,el)
                                el))))))
