@@ -83,7 +83,7 @@
 
 (defmethod (setf slide) (slide (index integer))
   (when +main+
-    (finalize (shiftf (aref (slides +main+) index) slide))
+    (shiftf (aref (slides +main+) index) slide)
     (when (= (index +main+) index)
       (with-eval-in-render-loop ()
         (change-scene +main+ slide)))

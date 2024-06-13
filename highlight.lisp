@@ -68,7 +68,7 @@
 (define-language :lisp
   :comment ";.*(\\n|$)"
   :string "\"[^\"]*\""
-  :construct "\\b(block|let*|return-from|catch|load-time-value|setq|eval-when|locally|symbol-macrolet|flet|macrolet|tagbody|function|multiple-value-call|the|go|multiple-value-prog1|throw|if|progn|unwind-protect|labels|progv|let|quote|defclass|defconstant|defgeneric|defmacro|defmethod|defpackage|defparameter|defsetf|defstruct|deftype|defun|defvar|define-[^\\s]+)\\b"
+  :construct "\\b(block|when|unless|loop|let*|return-from|catch|load-time-value|setq|eval-when|locally|symbol-macrolet|flet|macrolet|tagbody|function|multiple-value-call|the|go|multiple-value-prog1|throw|if|progn|unwind-protect|labels|progv|let|quote|defclass|defconstant|defgeneric|defmacro|defmethod|defpackage|defparameter|defsetf|defstruct|deftype|defun|defvar|define-[^\\s]+|do-[^\\s]+|check-[^\\s]+)\\b"
   :keyword "&(whole|environment|optional|key|rest|body|allow-other-keys|aux)|(^|[^:\\w]):[^ ()\",.:]+")
 
 (define-language :link
