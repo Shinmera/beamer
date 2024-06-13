@@ -23,6 +23,7 @@
    #:items
    #:editor
    #:image
+   #:arrange
    #:on-show
    #:note
    #:show-time)
@@ -53,7 +54,7 @@
 (defpackage #:beamer-user
   (:nicknames #:org.shirakumo.beamer.user)
   (:import-from #:cl #:in-package #:use-package)
-  (:shadowing-import-from #:beamer #:define-slide #:enter-instance #:p #:h #:c #:items #:editor #:image #:on-show #:note #:show-time)
+  (:shadowing-import-from #:beamer #:define-slide #:enter-instance #:p #:h #:c #:items #:editor #:image #:on-show #:note #:show-time #:arrange)
   (:local-nicknames
    (#:alloy #:org.shirakumo.alloy)
    (#:trial-alloy #:org.shirakumo.fraf.trial.alloy)

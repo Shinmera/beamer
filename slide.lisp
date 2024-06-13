@@ -1,5 +1,6 @@
 (in-package #:org.shirakumo.beamer)
 
+(defvar *layout-parent* NIL)
 (defclass slide-panel (trial-alloy:menuing-panel) ())
 
 (defmethod initialize-instance :after ((panel slide-panel) &key)
@@ -35,8 +36,10 @@
        (enter instance slide))
       (alloy:layout-element
        (alloy:enter instance
-                    (or (trial-alloy:find-panel 'slide-panel (ui slide))
-                        (trial:show (make-instance 'slide-panel) :ui (ui slide))))))))
+                    (or *layout-parent*
+                        (trial-alloy:find-panel 'slide-panel (ui slide))
+                        (trial:show (make-instance 'slide-panel) :ui (ui slide))))))
+    instance))
 
 (defmethod setup-scene ((show slide-show) (slide slide))
   (when (= (length slide) 0)

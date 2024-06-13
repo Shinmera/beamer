@@ -5,24 +5,24 @@
 (defparameter *code-font* "Triplicate T4")
 
 (defclass slide-text (alloy:label*)
-  ((size :initarg :size :initform 30 :accessor size)
+  ((size :initarg :size :initform (alloy:un 30) :accessor size)
    (halign :initarg :halign :initform :left :accessor halign)))
 
 (presentations:define-realization (alloy:ui slide-text)
   ((:label simple:text)
-   (alloy:margins 0 10) alloy:text
+   (alloy:margins 0 5) alloy:text
    :wrap T
    :halign (halign alloy:renderable)
    :pattern colors:white
    :font *body-font*
-   :size (alloy:px (size alloy:renderable))))
+   :size (size alloy:renderable)))
 
 (presentations:define-update (alloy:ui slide-text)
   (:label
    :pattern colors:white))
 
 (defclass header (slide-text)
-  ((size :initform 48)))
+  ((size :initform (alloy:un 48))))
 
 (presentations:define-update (alloy:ui header)
   (:label
@@ -52,16 +52,30 @@
   (multiple-value-bind (base regions) (determine-regions text :language language :theme theme)
     (apply #'enter-instance 'code :value text :color base :markup regions initargs)))
 
-(defclass items (alloy:vertical-linear-layout)
-  ((alloy:cell-margins :initform (alloy:margins 50 2 2 2))))
+(defclass items (alloy:grid-layout)
+  ()
+  (:default-initargs :col-sizes '(60 T) :row-sizes '(60)
+                     :cell-margins (alloy:margins 5)))
 
-(defmethod initialize-instance :after ((items items) &key entries)
-  (dolist (entry entries)
-    (alloy:enter (make-instance 'paragraph :value entry) items)))
+(defclass bullet-point (alloy:layout-element alloy:renderable)
+  ())
 
-(defun items (&rest body)
+(presentations:define-realization (alloy:ui bullet-point)
+  ((bullet simple:ellipse)
+   (alloy:margins 30)
+   :pattern colors:white))
+
+(defmacro items (&body body)
   (form-fiddle:with-body-options (entries opts) body
-    (enter-instance 'items :entries entries)))
+    `(let ((*layout-parent* (enter-instance 'items ,@opts)))
+       ,@(loop for el in entries
+               collect `(enter-instance 'bullet-point)
+               collect `(let ((*layout-parent* (enter-instance 'alloy:vertical-linear-layout
+                                                               :min-size (alloy:size)
+                                                               :cell-margins (alloy:margins))))
+                          ,(if (stringp el)
+                               `(p ,el)
+                               el))))))
 
 (defclass image (alloy:direct-value-component alloy:icon)
   ((padding :initarg :padding :initform (alloy:margins 10) :accessor padding)))
@@ -83,6 +97,14 @@
 (defun image (file size &rest initargs)
   (apply #'enter-instance 'image :value (slide-file file) :sizing-strategy (make-instance 'alloy:fixed-size :fixed-size (apply #'coerce-size size))
          initargs))
+
+(defmacro arrange (&body body)
+  (form-fiddle:with-body-options (entries opts) body
+    `(let ((*layout-parent* (enter-instance 'alloy:grid-bag-layout ,@opts :growth-policy :vertical)))
+       ,@(loop for el in entries
+               collect (if (stringp el)
+                           `(p ,el)
+                           el)))))
 
 (defmacro on-show (&body body)
   `(push (lambda () ,@body) (on-show-functions *slide*)))
