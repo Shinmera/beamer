@@ -110,7 +110,7 @@
         (setf (slide pos) null)))))
 
 (defun start-slideshow (path &key (index 0) (muffle-logging NIL))
-  (load-keymap :package #.*package*)
+  (trial::load-mapping #.(merge-pathnames "keymap.lisp" (or *compile-file-pathname* *load-pathname*)) :package #.*package*)
   (if muffle-logging
       (let ((level (v:repl-level)))
         (setf (v:repl-level) :error)
