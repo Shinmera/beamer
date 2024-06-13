@@ -1,0 +1,68 @@
+<!DOCTYPE html> <html lang="EN"> <head> <meta charset="utf-8"> <title>Beamer</title> <style>html body{margin:0 auto 0 auto;padding:20px;max-width:1024px;font-family:sans-serif;font-size:14pt;overflow-y:scroll;}html body a{text-decoration:none;}html body a[href]{color:#0055AA;}html body a[href]:hover{color:#0088EE;}html body pre{background:#FAFAFA;border:1px solid #DDDDDD;padding:0.75em;overflow-x:auto;}html body pre >code a[href]{color:#223388;}article.project h1{font-size:1.7em;}article.project h1,article.project h2,article.project h3,article.project h4,article.project h5,article.project h6{margin:0.2em 0 0.1em 0;text-indent:1em;}article.project >header{text-align:center;}article.project >header img.logo{display:block;margin:auto;max-height:170px;}article.project >header h1{display:inline-block;text-indent:0;font-size:2.5em;}article.project >header .version{vertical-align:bottom;}article.project >header .languages{margin-top:-0.5em;text-transform:capitalize;}article.project >header .description{margin:0;}article.project >header .pages{margin-top:0.5em;font-size:1.2em;text-transform:capitalize;}article.project >header .pages a{display:inline-block;padding:0 0.2em;}article.project >section{margin:1em 0 1em 0;}article.project >section img{max-width:100%;}article.project #index >ul{list-style:none;margin:0;padding:0;}article.project .row label{display:inline-block;min-width:8em;}article.project #system .row{display:flex;}article.project #system #dependencies{display:inline;margin:0;padding:0;}article.project #system #dependencies li{display:inline;padding:0 0.2em;}article.project #system #author label{vertical-align:top;}article.project #system #author ul{display:inline-block;margin:0;padding:0;list-style:none;}article.definition{margin:1em 0 0 0;}article.definition >header h1,article.definition >header h2,article.definition >header h3,article.definition >header h4,article.definition >header h5,article.definition >header h6{text-indent:0;display:inline-block;}article.definition >header ul{display:inline-block;list-style:none;margin:0;padding:0;}article.definition >header ul li{display:inline-block;padding:0 0.2em 0 0;}article.definition >header .visibility{display:none;}article.definition >header .visibility,article.definition >header .type{text-transform:lowercase;}article.definition >header .source-link{visibility:hidden;float:right;}article.definition >header .source-link:after{visibility:visible;content:"[SRC]";}article.definition .docstring{margin:0 0 0 1em;}article.definition .docstring pre{font-size:0.8em;white-space:pre-wrap;}.definition.package >header ul.nicknames{display:inline-block;list-style:none;margin:0;padding:0 0 0 1em;}.definition.package >header ul.nicknames li{display:inline;}.definition.package >header ul.nicknames:before{content:"(";}.definition.package >header ul.nicknames:after{content:")";}.definition.package ul.definitions{margin:0;list-style:none;padding:0 0 0 0.5em;}.definition.callable >header .name:before,.definition.type >header .name:before{content:"(";font-weight:normal;}.definition.callable >header .arguments:after,.definition.type >header .arguments:after{content:")";}.definition.callable >header .arguments .arguments:before,.definition.type >header .arguments .arguments:before{content:"(";}.definition.callable >header .arguments .argument,.definition.type >header .arguments .argument{padding:0;}.definition.callable >header .arguments .argument.lambda-list-keyword,.definition.type >header .arguments .argument.lambda-list-keyword{color:#991155;}.definition li>mark{background:none;border-left:0.3em solid #0088EE;padding-left:0.3em;display:block;}</style> </head> <body> <article class="project"> <header>   <h1>beamer</h1>   <span class="version">1.0.0</span>    <p class="description">A slide show software based on Trial</p>   </header> <section id="documentation"><article><h1 id="about beamer">About Beamer</h1><p>This is a slide show or &quot;powerpoint&quot; application built upon the <a class="external-link" href="https://shirakumo.org/trial">Trial</a> game engine. Being built with a game-engine allows you to add all sorts of interactive elements to your slides, though if we're being real, I only made this for the purpose of being cheeky in my own talks about Trial.</p><h2 id="basic how to">Basic How To</h2><p>Create a lisp source file, start with <code>(in-package #:beamer-user)</code> and then define your slides using <code>define-slide</code>.</p><code style="display:block" class="code-block" data-language="common lisp"><pre>(define-slide hello
+  (h &quot;Hello Everyone!&quot;)
+  (p &quot;This is some paragraph of text that would usually be filled with Lorem Ipsum, but I'm too lazy to go generate that text right now, so I'm just typing something out here. The text will wrap properly anyway.&quot;)
+  (items
+    &quot;You can also&quot;
+    &quot;Create lists&quot;)
+  (image &quot;my-image.png&quot; '(100 100)))</pre></code><p>In order to actually run your slide show, load up <code>beamer</code> and use <code>start-slideshow</code>:</p><code style="display:block" class="code-block" data-language="common lisp"><pre>(beamer:start-slideshow &quot;my-presentation.lisp&quot;)</pre></code><p>You can then navigate slides with the following keys:</p><ul><li><p><code>Page Up</code> Previous slide</p></li><li><p><code>Page Down</code> Next slide</p></li><li><p><code>Home</code> First slide</p></li><li><p><code>End</code> Last slide</p></li><li><p><code>Escape</code> Close presentation</p></li><li><p><code>F11</code> Toggle fullscreen</p></li></ul><p>Within the slide definitions you can use the following shorthand functions:</p><ul><li><p><code>h</code> A header</p></li><li><p><code>p</code> A paragraph</p></li><li><p><code>c</code> A code segment</p></li><li><p><code>items</code> A bullet list</p></li><li><p><code>image</code> An image<br>The path is relative to the slide file. You have to provide a size as well, which should be a list of two elements with either both being unit numbers, or one being <code><a href="http://l1sp.org/cl/%2A" class="xref">*</a></code> in which case the image will take up all space in that direction.</p></li><li><p><code>arrange</code> A grid layout<br>You must specify at least the <code>:col-sizes</code> and <code>:row-sizes</code>.</p></li><li><p><code>editor</code> A code editor<br>The path is relative to the slide file and can be the slide file itself. You can also pass the following options:</p><ul><li><p><code>:start</code> A character index or string to match a line for after which the text for the editor begins</p></li><li><p><code>:end</code> A character index or string to match a line for up to which the text is displayed in the editor</p></li><li><p><code>:trim</code> A number of characters to trim off the beginning of each line</p></li><li><p><code>:language</code> A name for a syntax highlighting scheme to use. The following are supported:</p><ul><li><p><code>NIL</code></p></li><li><p><code>:lisp</code></p></li><li><p><code>:glsl</code></p></li><li><p><code>:link</code></p></li></ul></li><li><p><code>:theme</code> A name for a highlighting theme to use. The following are supported:</p><ul><li><p><code>NIL</code></p></li><li><p><code>:monokai</code></p></li></ul></li><li><p><code>:size</code> The base font size</p></li></ul><p>When in the editor in a slide you can use <code>C-s</code> to save the text, <code>C-l</code> to reload the text, and <code>C-c</code> to compile the text as lisp source.</p></li></ul><h2 id="advanced crap">Advanced Crap</h2><p>A slide within Beamer is simply a <code>scene</code> that sets up some defaults. Every shorthand function like <code>h</code> just creates an Alloy component and inserts it into the UI. This means that you can also create whatever other Alloy layouts you want within the slide. And because it is a Trial scene, you can also create whatever other Trial objects you want and add them into the scene:</p><code style="display:block" class="code-block" data-language="common lisp"><pre>(ql:quickload :trial-assets)
+
+(define-slide trial-in-slide
+  (h &quot;Check this out:&quot;)
+  (enter-instance 'directional-light :direction (vec 0.5 -1 0) :color (vec3 1))
+  (enter-instance 'ambient-light :color (vec3 0.5))
+  (enter-instance 'basic-animated-entity :asset (org.shirakumo.fraf.trial.assets:asset :woman))
+  (enter-instance 'target-camera :target (vec 0 2.5 0) :location (vec 0 2 4))
+  (enter-instance 'pbr-render-pass))</pre></code><p>You can of course also set up Alloy components and even tie them together with Trial objects to make the slides interactive that way.</p><p>Beamer can also be deployed into a standalone executable, though of course beware that you won't be able to load new ASDF systems in your presentations with the deployed version.</p></article></section>   <section id="system"> <h2>System Information</h2>  <div class="row"> <label for="version">Version:</label> <a id="version">1.0.0</a> </div>   <div class="row"> <label for="dependencies">Dependencies:</label> <ul id="dependencies"><li><a class="external" href="https://Shinmera.github.io/deploy/">deploy</a></li><li><a class="external" href="https://Shirakumo.github.io/trial/">trial-glfw</a></li><li><a class="external" href="https://Shirakumo.github.io/trial/">trial-alloy</a></li><li><a class="external">trial-png</a></li><li><a class="external">trial-jpeg</a></li><li><a class="external" href="https://Shinmera.github.io/array-utils/">array-utils</a></li><li><a class="external" href="https://Shinmera.github.io/form-fiddle/">form-fiddle</a></li></ul> </div>   <div class="row" id="author"> <label for="author">Author:</label> <a href="mailto:shinmera@tymoon.eu">Yukari Hafner</a> </div>   <div class="row"> <label for="license">License:</label> <a id="license" href="https://github.com/Shinmera/beamer/blob/ca231e1bbb9d13ba7ea9d2a5445d5b018f5a6f9e/LICENSE">zlib</a> </div>   <div class="row"> <label for="homepage">Homepage:</label> <a id="homepage" href="https://Shinmera.github.io/beamer/">https://Shinmera.github.io/beamer/</a> </div>   <div class="row"> <label for="bug-tracker">Bug Tracker:</label> <a id="bug-tracker" href="https://github.com/Shinmera/beamer/issues">https://github.com/Shinmera/beamer/issues</a> </div>   <div class="row"> <label for="sources">Sources:</label> <a id="sources" href="https://github.com/Shinmera/beamer.git">https://github.com/Shinmera/beamer.git</a> </div>  </section>    </article> <script>window.addEventListener("DOMContentLoaded", function(){
+    var unmarkElement = function(el){
+        if(el.tagName === "mark" || el.tagName === "MARK"){
+            [].forEach.call(el.childNodes, function(child){
+                el.parentNode.insertBefore(child, el);
+            });
+            el.parentNode.removeChild(el);
+        }else if(el.parentNode.tagName === "mark"){
+            return unmarkElement(el.parentNode);
+        }
+        return null;
+    }
+
+    var unmarkAll = function(root){
+        root = root || document;
+        [].forEach.call(root.querySelectorAll("mark"), unmarkElement);
+    }
+    
+    var markElement = function(el){
+        if(el.parentNode.tagName === "mark" || el.parentNode.tagName === "MARK"){
+            return el.parentNode;
+        } else {
+            unmarkAll();
+            var marked = document.createElement("mark");
+            el.parentNode.insertBefore(marked, el);
+            marked.appendChild(el);
+            return marked;
+        }
+    }
+
+    var markFragmented = function(){
+        if(window.location.hash){
+            var el = document.getElementById(decodeURIComponent(window.location.hash.substr(1)));
+            if(el) markElement(el);
+        }
+    }
+
+    var registerXrefLink = function(link){
+        var el = document.getElementById(decodeURIComponent(link.getAttribute("href").substr(1)));
+        if(el){
+            link.addEventListener("click", function(){
+                markElement(el);
+            });
+        }
+    }
+
+    var registerXrefLinks = function(root){
+        root = root || document;
+        [].forEach.call(root.querySelectorAll("a.xref"), registerXrefLink);
+    }
+
+    markFragmented();
+    registerXrefLinks();
+}); </script> </body> </html> 
