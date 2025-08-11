@@ -4,9 +4,9 @@
   :author "Yukari Hafner <shinmera@tymoon.eu>"
   :maintainer "Yukari Hafner <shinmera@tymoon.eu>"
   :description "A slide show software based on Trial"
-  :homepage "https://Shinmera.github.io/beamer/"
-  :bug-tracker "https://github.com/Shinmera/beamer/issues"
-  :source-control (:git "https://github.com/Shinmera/beamer.git")
+  :homepage "https://shinmera.com/docs/beamer/"
+  :bug-tracker "https://shinmera.com/project/beamer/issues"
+  :source-control (:git "https://shinmera.com/project/beamer.git")
   :serial T
   :components ((:file "package")
                (:file "toolkit")
